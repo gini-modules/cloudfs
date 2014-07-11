@@ -1,4 +1,11 @@
 <?php
+/**
+* @file Qiniu.php
+* @brief 七牛
+* @author PiHiZi
+* @version 0.1.0
+* @date 2014-07-11
+ */
 
 namespace Gini\Controller\API\CloudFS;
 

@@ -1,10 +1,10 @@
 <?php
 /**
 * @file Qiniu.php
-* @brief Qiniu php-sdk的代理层
-* @author Hongjie Zhu
-* @version 1.0.0
-* @date 2014-05-13
+* @brief 七牛云前代理
+* @author PiHiZi
+* @version 0.1.0
+* @date 2014-07-11
  */
 
 namespace Gini\CloudFS;
