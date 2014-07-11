@@ -30,11 +30,11 @@ qiniu:
                 x\:callbackBody: key=$(key)&id=$(x:id)
             # 上传文件之后，如果需要有其他的处理，可以指定callback项
             # browser以post方式将上传成功的返回结构发送给该callback，并取得返回值
-            callback: YOUR-CALLBACK-URL
+            #callback: YOUR-CALLBACK-URL
         # local: 通过cloudfs将文件中转上传
         local:
-            url: YOUR-UPLOAD-URL
-            callback: YOUR-CALLBACK-URL
+            url: /ajax/cloudfs/qiniu/upload
+            #callback: YOUR-CALLBACK-URL
     # 在担任server的服务器需要指定server项
     server:
         accessKey: XlvRPPcaj1hyvHPE_LkMCqfP9BAeaCn0b1OxPQSd

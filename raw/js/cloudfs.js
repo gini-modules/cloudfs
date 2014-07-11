@@ -67,7 +67,7 @@ define('cloudfs', ['jquery'], function($) {
 
     };
 
-    var CloudFS = function(cloud, type) {
+    var CloudFS = function(type, cloud) {
         this.configURL = '/ajax/cloudfs/getConfig';
         this.cloud = cloud || '';
         this.type = type || '';
