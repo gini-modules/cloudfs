@@ -35,6 +35,7 @@ namespace Gini
         private $_cloud;
         private $_config;
         private $_bucket;
+        private $_has_access = null;
         /**
             * @brief 云服务器代理初始化
             *
@@ -52,6 +53,14 @@ namespace Gini
 
         public function __call($method, $params=[])
         {
+            $action = 'upload';
+            if (is_null($this->_has_access)) {
+                $this->_has_access = \Gini\Event::trigger("cloudfs.is_allowed_to[$action]", $this, $action);
+            }
+            $hasAccess = $this->_has_access;
+
+            if (!$hasAccess) return;
+
             $bucket = $this->_bucket;
             $className = "\\Gini\\CloudFS\\{$this->_cloud}";
             $iCloud = \Gini\IoC::construct($className);
