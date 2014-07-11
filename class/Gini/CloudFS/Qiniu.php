@@ -29,10 +29,23 @@ class Qiniu extends \Gini\CloudFS\Cloud
 
     public function getImageURL($filename)
     {
+        return $this->getThumbURL($filename);
     }
 
     public function getThumbURL($filename, $width=0, $height=0)
     {
+        $bucket = $this->_bucket;
+        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $filename);
+        $imgViewUrl .= '?' . time();
+        if ($width && $height) {
+            $opts = [
+                1   // mode
+                ,'w',$width
+                ,'h',$height
+            ];
+            $imgViewUrl .= '&imageView/' . implode('/', $opts);
+        }
+        return $imgViewUrl;
     }
 
     private function _getFilename()

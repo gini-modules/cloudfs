@@ -54,8 +54,6 @@ namespace Gini
         {
             $config = \Gini\Config::get('cloudfs');
             $this->_cloud = $type ?: $config['default'];
-            $config = $config[$this->_cloud];
-            $this->_bucket = $config['bucket'];
         }
 
         public function __call($method, $params=[])
@@ -68,10 +66,8 @@ namespace Gini
 
             if (!$hasAccess) return;
 
-            $bucket = $this->_bucket;
             $className = "\\Gini\\CloudFS\\{$this->_cloud}";
             $iCloud = \Gini\IoC::construct($className);
-            $iCloud->setBucket($bucket);
             if (method_exists($iCloud, $method)) {
                 return call_user_func_array(array($iCloud, $method), $params);
             }
