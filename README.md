@@ -1,6 +1,16 @@
 
 云前的一个封装
 
+### 安装
+
+1. git clone https://github.com/pihizi/gini-cloudfs.git cloudfs
+
+1. gini composer init
+
+1. composer install
+
+1. gini cache && gini config update
+
 ### 调用方法
 
 1. 部署依赖关系: 在gini.json中声明依赖
