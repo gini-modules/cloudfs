@@ -90,4 +90,4 @@
             });
         });
 
-4. 权限验证Callback: 如果没有callback，默认用户是没有权限的, 将无法进行任何操作
+4. 权限验证Callback(在hooks.yml中定义): 如果没有callback，只有明确返回false，表示没有权限
