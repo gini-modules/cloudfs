@@ -22,9 +22,24 @@ class Qiniu extends \Gini\Controller\CGI
 
     public function actionCallback()
     {
-        $cfs = \Gini\IoC::construct('\Gini\CloudFS', \Gini\CloudFS\Qiniu::CLOUD_NAME);
+        $form = $this->form();
+        $client = $form['x:client'];
+        $cfs = \Gini\IoC::construct('\Gini\CloudFS', $client);
         $bool = $cfs->isFromQiniuServer();
         if (!$bool) return $this->showNothing();
+        $result = $cfs->runServerCallback($this->form());
+        return $this->showJSON($result);
+    }
+
+    public function actionParseData()
+    {
+        $form = $this->form();
+        $data = $form['data'];
+        if (!$data['key']) return $this->showNothing();
+        $cloud = $form['cloud'];
+        $cloud = \Gini\IoC::construct('\Gini\CloudFS', $cloud);
+        $image = $cloud->getThumbURL($data['key']);
+        return $this->showJSON($image);
     }
 
     public function actionUpload()
@@ -37,8 +52,10 @@ class Qiniu extends \Gini\Controller\CGI
         $form = $this->form('post');
         if (!$form['token']) return $this->showNothing();
         **/
-        $cfs = \Gini\IoC::construct('\Gini\CloudFS', \Gini\CloudFS\Qiniu::CLOUD_NAME);
+        $form = $this->form('post');
+        $client = $form['cfs:cloud'];
+        $cfs = \Gini\IoC::construct('\Gini\CloudFS', $client);
         $result = $cfs->upload($file);
-        return $result;
+        return $this->showJSON($result);
     }
 }

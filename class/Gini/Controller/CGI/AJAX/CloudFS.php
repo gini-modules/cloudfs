@@ -20,9 +20,8 @@ class CloudFS extends \Gini\Controller\CGI
     {
         $form = $this->form();
         $cloud = $form['cloud'];
-        $type = $form['type'];
         $cfs = \Gini\IoC::construct('\Gini\CloudFS', $cloud);
-        $config = $cfs->getUploadConfig($type);
+        $config = $cfs->getUploadConfig();
         return $this->showJSON($config);
     }
 }

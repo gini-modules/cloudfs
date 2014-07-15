@@ -5,38 +5,47 @@ url: http://cloudfs.gapper.in/api
 client_id: 5a2fe5921a81b4c7fe1f8a32fe1c0268
 client_secret: 2e35f59e419d1cbc62ce24043aa0c229
 
-# 在没有指定选择的cloud时，默认使用的配置，在client角色的站点配置
-default: qiniu
-
-# 各类cloud的配置信息，如qiniu
-qiniu:
-    # 当前云所使用的bucket
-    bucket: cloudfs
-    # client在担任client的服务器需要指定client项
-    client:
+# client在担任client的服务器需要指定client项
+client:
+    # 在没有指定选择的cloud时，默认使用的配置，在client角色的站点配置
+    default: qiniu-client
+    # 各类cloud的配置信息，如qiniu, abc
+    qiniu-client:
+        # 使用的云接口: qiniu
+        driver: qiniu
+        # 当前云所使用的bucket
+        bucket: app-brand
+        # 图像裁剪，最大宽度
+        image-max-width: 150
+        # 图像裁剪，最大高度
+        image-max-height: 150
         # 用户自定义当前client支持的文件上传方式
-        # cloud：直接在浏览器端直接上传到云端
-        cloud:
+        options:
             # 上传文件的地址
-            url: http://up.qiniu.com/
-            # 为浏览器颁发token的方式
-            # cloud：由server产生
-            # 其他：有各个app自主控制
-            tokenType: cloud
+            #url: http://up.qiniu.com/
+            #也可以上传到本地
+            url: /ajax/cloudfs/qiniu/upload
+            #上传成功后的客户端回调函数
+            callback: /ajax/cloudfs/qiniu/parseData
             # 自定义数据
             # 数据传送给browser，browser在向云端上传文件时，将附带这些数据
+            # 系统占用了'cfs:'开头的自定义变量，请使用时注意
             params:
-                x\:callbackUrl: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
-                x\:callbackBody: key=$(key)&id=$(x:id)
-            # 上传文件之后，如果需要有其他的处理，可以指定callback项
-            # browser以post方式将上传成功的返回结构发送给该callback，并取得返回值
-            #callback: YOUR-CALLBACK-URL
-        # local: 通过cloudfs将文件中转上传
-        local:
-            url: /ajax/cloudfs/qiniu/upload
-            #callback: YOUR-CALLBACK-URL
-    # 在担任server的服务器需要指定server项
-    server:
-        accessKey: XlvRPPcaj1hyvHPE_LkMCqfP9BAeaCn0b1OxPQSd
-        secretKey: MfezOYL7-rNaEyjyfhG1O4IqGWJysBW2BD3Ygh1p
+                #以下是七牛支持的自定义变量
+                #x:callbackUrl: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
+                # CloudFS定义的，用无状态的保持client name
+                #x:client: qiniu-client
+                #x:callbackBody: key=$(key)&client=$(x:client)
+
+# 在担任server的服务器需要指定server项
+server:
+    qiniu-server-a:
+        driver: qiniu
+        # 除了driver和options为固定项外，其余项由DRIVER控制
+        # 比如：qiniu会有bucket，而ftp的方式可能就没有
+        bucket: app-brand
+        options:
+            #不同的cloud可能或有不同的配置
+            accessKey: XlvRPPcaj1hyvHPE_LkMCqfP9BAeaCn0b1OxPQSd
+            secretKey: MfezOYL7-rNaEyjyfhG1O4IqGWJysBW2BD3Ygh1p
 ...

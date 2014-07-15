@@ -39,9 +39,8 @@ namespace Gini
 
         use CloudFSTrait;
 
-        private $_cloud;
-        private $_config;
-        private $_bucket;
+        private $_client;
+        private $_driver;
         private $_has_access = null;
         /**
             * @brief 云服务器代理初始化
@@ -52,8 +51,9 @@ namespace Gini
          */
         public function __construct($type=null)
         {
-            $config = \Gini\Config::get('cloudfs');
-            $this->_cloud = $type ?: $config['default'];
+            $config = \Gini\Config::get('cloudfs.client');
+            $this->_client = $type ?: $config['default'];
+            $this->_driver = $config[$this->_client]['driver'];
         }
 
         public function __call($method, $params=[])
@@ -62,12 +62,12 @@ namespace Gini
             if (is_null($this->_has_access)) {
                 $this->_has_access = \Gini\Event::trigger("cloudfs.is_allowed_to[$action]", $this, $action);
             }
-            $hasAccess = $this->_has_access;
+            // 除非明确返回false，否走都认为用户是有权限的
+            if (false===$this->_has_access) return;
 
-            if (!$hasAccess) return;
-
-            $className = "\\Gini\\CloudFS\\{$this->_cloud}";
-            $iCloud = \Gini\IoC::construct($className);
+            if (!$this->_driver) return;
+            $className = "\\Gini\\CloudFS\\{$this->_driver}";
+            $iCloud = \Gini\IoC::construct($className, $this->_client);
             if (method_exists($iCloud, $method)) {
                 return call_user_func_array(array($iCloud, $method), $params);
             }

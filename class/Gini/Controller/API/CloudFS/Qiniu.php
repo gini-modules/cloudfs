@@ -13,17 +13,31 @@ class Qiniu extends \Gini\Controller\API
 {
     private function getConfig()
     {
-        $config = \Gini\Config::get('cloudfs.qiniu');
-        $config = $config['server'];
-        return $config;
+        $sess = $_SESSION['cloudfs.rpc.qiniu.config'];
+        return $sess['config'];
     }
 
     private function getBucketName()
     {
-        $config = \Gini\Config::get('cloudfs.qiniu');
-        $bucket = $config['bucket'];
-        return $bucket;
+        $sess = $_SESSION['cloudfs.rpc.qiniu.config'];
+        return $sess['bucket'];
     }
+
+    public function actionInit($bucket)
+    {
+        $config = \Gini\Config::get('cloudfs.server');
+        foreach ($config as $c) {
+            if ($c['driver']==='qiniu' && $c['bucket']===$bucket) {
+                $config = $c['options'];
+                $_SESSION['cloudfs.rpc.qiniu.config'] = [
+                    'bucket'=> $bucket
+                    ,'config'=> $config
+                ];
+                break;
+            }
+        }
+    }
+
     // 暂时不允许客户端自定义filename
     public function actionGetURI($host, $filename='')
     {
@@ -39,10 +53,12 @@ class Qiniu extends \Gini\Controller\API
         $bucket = $this->getBucketName();
         $config = $this->getConfig();
 
+        if (!$config || !$bucket) return;
+
         $config = [ $bucket, $config['accessKey'], $config['secretKey'] ];
         list($bucket, $accessKey, $secretKey) = $config;
 
-        Qiniu_SetKeys($accessKey, $secretKey);
+        \Qiniu_SetKeys($accessKey, $secretKey);
 
         $filename = $params['file'];
         $filename = $filename ? "{$bucket}:{$filename}" : $bucket;
@@ -63,6 +79,8 @@ class Qiniu extends \Gini\Controller\API
     {
         $bucket = $this->getBucketName();
         $config = $this->getConfig();
+
+        if (!$config || !$bucket) return;
 
         $config = [ $bucket, $config['accessKey'], $config['secretKey'] ];
         list($bucket, $accessKey, $secretKey) = $config;

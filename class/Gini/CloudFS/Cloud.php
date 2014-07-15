@@ -19,6 +19,6 @@ abstract class Cloud
 
     abstract public function getThumbURL($filename, $width=0, $height=0);
 
-    abstract public function getUploadConfig($type='cloud');
+    abstract public function getUploadConfig();
 
 }

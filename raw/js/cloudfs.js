@@ -11,6 +11,8 @@ define('cloudfs', ['jquery'], function($) {
 
     var upload = function(data, config, handler) {
 
+        var that = this;
+
         var form = new FormData();
         for (var k in data) {
             form.append(k, data[k]);
@@ -21,6 +23,8 @@ define('cloudfs', ['jquery'], function($) {
                 form.append(k, config.params[k]);
             }
         }
+
+        form.append('cfs:cloud', that.cloud);
 
         var xhr = new XMLHttpRequest();
 
@@ -40,7 +44,7 @@ define('cloudfs', ['jquery'], function($) {
             if (status==200) {
                 var data = JSON.parse(xhr.responseText);
                 if (config.callback) {
-                    $.post(config.callback, {data: data}, function(data) {
+                    $.post(config.callback, {cloud: that.cloud, data: data}, function(data) {
                         handler.success && handler.success(data);
                         handler.always && handler.always(evt);
                     });
@@ -67,19 +71,17 @@ define('cloudfs', ['jquery'], function($) {
 
     };
 
-    var CloudFS = function(type, cloud) {
+    var CloudFS = function(cloud) {
         this.configURL = '/ajax/cloudfs/getConfig';
         this.cloud = cloud || '';
-        this.type = type || '';
     };
 
     CloudFS.prototype.upload = function(data, handler) {
-
+        var that = this;
         $.get(this.configURL, {
             cloud: this.cloud
-            ,type: this.type
         }, function(config) {
-            upload(data, config || {}, handler || {});
+            upload.call(that, data, config || {}, handler || {});
         });
 
         return this;
