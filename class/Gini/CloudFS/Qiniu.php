@@ -9,9 +9,9 @@
 
 namespace Gini\CloudFS;
 
-require_once(__DIR__.'/../../../vendor/qiniu/php-sdk/qiniu/rs.php');
-require_once(__DIR__.'/../../../vendor/qiniu/php-sdk/qiniu/io.php');
-require_once(__DIR__.'/../../../vendor/qiniu/php-sdk/qiniu/fop.php');
+require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
+require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/io.php');
+require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/fop.php');
 
 class Qiniu extends \Gini\CloudFS\Cloud
 {
