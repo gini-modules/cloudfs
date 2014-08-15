@@ -48,7 +48,7 @@ class Qiniu extends \Gini\Controller\API
 
     public function actionGetKeys($params)
     {
-        require_once(__DIR__.'/../../../../../vendor/qiniu/php-sdk/qiniu/rs.php');
+        require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
 
         $bucket = $this->getBucketName();
         $config = $this->getConfig();

@@ -41,7 +41,6 @@ namespace Gini
 
         private $_client;
         private $_driver;
-        private $_has_access = null;
         /**
             * @brief 云服务器代理初始化
             *
@@ -58,17 +57,16 @@ namespace Gini
 
         public function __call($method, $params=[])
         {
-            $action = 'upload';
-            if (is_null($this->_has_access)) {
-                $this->_has_access = \Gini\Event::trigger("cloudfs.is_allowed_to[$action]", $this, $action);
-            }
-            // 除非明确返回false，否走都认为用户是有权限的
-            if (false===$this->_has_access) return;
-
             if (!$this->_driver) return;
             $className = "\\Gini\\CloudFS\\{$this->_driver}";
             $iCloud = \Gini\IoC::construct($className, $this->_client);
             if (method_exists($iCloud, $method)) {
+                // action的取值：upload/getImageURL/getThumbURL/getUploadConfig
+                $action = strtolower($method);
+                $hasAccess = \Gini\Event::trigger("cloudfs.is_allowed_to[$action]", $this, $action);
+                // 除非明确返回false，否走都认为用户是有权限的
+                if (false===$hasAccess) return;
+
                 return call_user_func_array(array($iCloud, $method), $params);
             }
         }
