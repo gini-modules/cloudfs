@@ -1,11 +1,22 @@
 /*
 var cfs = new CloudFS('qiniu');
+
+// e.g 1
 cfs.upload(data, {
     'progress': function() {}
     ,'success': function() {}
     ,'error': function() {}
     ,'always': function() {}
 });
+
+// e.g 2
+cfs
+    .upload(data)
+    .progress(function() {})
+    .success(function() {})
+    .error(function() {})
+    .always(function() {})
+;
 */
 define('cloudfs', ['jquery'], function($) {
 
@@ -74,6 +85,7 @@ define('cloudfs', ['jquery'], function($) {
     var CloudFS = function(cloud) {
         this.configURL = '/ajax/cloudfs/getConfig';
         this.cloud = cloud || '';
+        this.handlers = {};
     };
 
     CloudFS.prototype.upload = function(data, handler) {
@@ -81,10 +93,32 @@ define('cloudfs', ['jquery'], function($) {
         $.get(this.configURL, {
             cloud: this.cloud
         }, function(config) {
-            upload.call(that, data, config || {}, handler || {});
+            var mHandlers = handler || {};
+            var rHandlers = $.extend(mHandlers, that.handlers);
+            upload.call(that, data, config || {}, rHandlers);
         });
 
         return this;
+    };
+
+    CloudFS.prototype.progress = function(method) {
+        this.handlers.progress = method;
+    };
+
+    CloudFS.prototype.abort = function(method) {
+        this.handlers.abort = method;
+    };
+
+    CloudFS.prototype.error = function(method) {
+        this.handlers.error = method;
+    };
+
+    CloudFS.prototype.success = function(method) {
+        this.handlers.success = method;
+    };
+
+    CloudFS.prototype.always = function(method) {
+        this.handlers.always= method;
     };
 
     return CloudFS;
