@@ -94,7 +94,8 @@ define('cloudfs', ['jquery'], function($) {
             cloud: this.cloud
         }, function(config) {
             var mHandlers = handler || {};
-            var rHandlers = $.extend(mHandlers, that.handlers);
+            var tHandlers = that.handlers || {};
+            var rHandlers = $.extend(tHandlers, mHandlers);
             upload.call(that, data, config || {}, rHandlers);
         });
 
