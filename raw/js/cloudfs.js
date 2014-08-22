@@ -25,12 +25,13 @@ define('cloudfs', ['jquery'], function($) {
         var that = this;
 
         var form = new FormData();
-        for (var k in data) {
+        var k;
+        for (k in data) {
             form.append(k, data[k]);
         }
 
         if ($.isPlainObject(config.params)) {
-            for (var k in config.params) {
+            for (k in config.params) {
                 form.append(k, config.params[k]);
             }
         }
@@ -43,11 +44,11 @@ define('cloudfs', ['jquery'], function($) {
             var info = false;
             if (evt.lengthComputable) {
                 info = {
-                    total: evt.total
-                    ,percent: Math.round(evt.loaded * 100 / evt.total)
+                    total: evt.total,
+                    percent: Math.round(evt.loaded * 100 / evt.total)
                 };
             }
-            handler.progress && handler.progress(info);
+            if (handler.progress) handler.progress(info);
         }, false);
 
         xhr.addEventListener('load', function(evt) {
@@ -56,25 +57,25 @@ define('cloudfs', ['jquery'], function($) {
                 var data = JSON.parse(xhr.responseText);
                 if (config.callback) {
                     $.post(config.callback, {cloud: that.cloud, data: data}, function(data) {
-                        handler.success && handler.success(data);
-                        handler.always && handler.always(evt);
+                        if (handler.success) handler.success(data);
+                        if (handler.always) handler.always(evt);
                     });
                 }
                 else {
-                    handler.success && handler.success(data);
-                    handler.always && handler.always(evt);
+                    if (handler.success) handler.success(data);
+                    if (handler.always) handler.always(evt);
                 }
             }
         }, false);
 
         xhr.addEventListener('error', function(evt) {
-            handler.error && handler.error(evt);
-            handler.always && handler.always(evt);
+            if (handler.error) handler.error(evt);
+            if (handler.always) handler.always(evt);
         }, false);
 
         xhr.addEventListener('abort', function(evt) {
-            handler.abort && handler.abort();
-            handler.always && handler.always(evt);
+            if (handler.abort) handler.abort();
+            if (handler.always) handler.always(evt);
         }, false);
 
         xhr.open('POST', config.url);
