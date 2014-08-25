@@ -37,15 +37,15 @@ client:
        rpc:
            url: "http://cloudfs.gapper.in/api"
            server: qiniu
-           client_id: 5a2fe5921a81b4c7fe1f8a32fe1c0268
-           client_secret: 2e35f59e419d1cbc62ce24043aa0c229
+           client_id: CLIENTID
+           client_secret: CLIENTSECRET
        callbacks:
            success: "\Name\To\Class::method"
            fail: "\Name\To\Class::method"
            always: "\Name\To\Class::method"
        options:
            mode: "direct"  # or "via-server"
-           bucket: app-brand
+           bucket: BUCKETNAME
            # params
 
 # 在担任server的服务器需要指定server项
@@ -55,7 +55,7 @@ server:
        driver: Qiniu
        # 配置可以访问CloudFS Server的客户端
        clients:
-           5a2fe5921a81b4c7fe1f8a32fe1c0268: 2e35f59e419d1cbc62ce24043aa0c229
+           CLIENTID: CLIENTSECRET
        callbacks:
            success: "\Name\To\Class::method"
            fail: "\Name\To\Class::method"
@@ -63,9 +63,9 @@ server:
        options:
            #不同的cloud可能或有不同的配置
            # 比如：qiniu会有bucket，而ftp的方式可能就没有
-           bucket: app-brand
-           accessKey: XlvRPPcaj1hyvHPE_LkMCqfP9BAeaCn0b1OxPQSd
-           secretKey: MfezOYL7-rNaEyjyfhG1O4IqGWJysBW2BD3Ygh1p
+           bucket: BUCKETNAME
+           accessKey: CLOUDACCESSKEY
+           secretKey: CLOUDSECRETKEY
 ...
 
 ```
