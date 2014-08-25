@@ -16,16 +16,16 @@ namespace Gini
             * @brief 获取rpc实例
          */
         private static $_RPC = [];
-        public function getRPC($type)
+        public function getRPC($type, $config=null)
         {
-            if (!self::$_RPC[$type]) {
+            if (!self::$_RPC[$type] && isset($config) && is_array($config)) {
                 try {
-                    $api = \Gini\Config::get($type . '.url');
-                    $client_id = \Gini\Config::get($type . '.client_id');
-                    $client_secret = \Gini\Config::get($type . '.client_secret');
+                    $api = $config['url'];
+                    $client_id = $config['client_id'];
+                    $client_secret = $config['client_secret'];
                     $rpc = \Gini\IoC::construct('\Gini\RPC', $api, $type);
-                    $rpc->authorize($client_id, $client_secret);
-                    self::$_RPC[$type] = $rpc;
+                    $bool = $rpc->authorize($config['server'], $client_id, $client_secret);
+                    if ($bool) self::$_RPC[$type] = $rpc;
                 } catch (\Gini\RPC\Exception $e) {
                     // rpc->authorize调用出现错误
                 }
@@ -51,15 +51,23 @@ namespace Gini
         public function __construct($type=null)
         {
             $config = \Gini\Config::get('cloudfs.client');
-            $this->_client = $type ?: $config['default'];
-            $this->_driver = $config[$this->_client]['driver'];
+            $clientKey = $type ?: $config['default'];
+            if (isset($config[$clientKey])) {
+                $this->_client = $clientKey;
+            }
         }
 
         public function __call($method, $params=[])
         {
-            if (!$this->_driver) return;
-            $className = "\\Gini\\CloudFS\\{$this->_driver}";
-            $iCloud = \Gini\IoC::construct($className, $this->_client);
+            if (!$this->_client) return;
+
+            $config = \Gini\Config::get('cloudfs.client');
+            $configClient = $config[$this->_client];
+            $driver = $configClient['driver'];
+
+            if (!$driver) return;
+            $className = "\\Gini\\CloudFS\\{$driver}";
+            $iCloud = \Gini\IoC::construct($className, $configClient);
             if (method_exists($iCloud, $method)) {
                 // action的取值：upload/getImageURL/getThumbURL/getUploadConfig
                 $action = strtolower($method);

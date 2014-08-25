@@ -38,7 +38,7 @@ class Qiniu extends \Gini\Controller\CGI
         if (!$data['key']) return $this->showNothing();
         $cloud = $form['cloud'];
         $cloud = \Gini\IoC::construct('\Gini\CloudFS', $cloud);
-        $image = $cloud->getThumbURL($data['key']);
+        $image = $cloud->getImageURL($data['key']);
         return $this->showJSON($image);
     }
 

@@ -1,31 +1,32 @@
 ---
-# RPC 调用相关的参数
-# 在担任cliet角色的站点中需要配置，如mall-brand
-url: http://cloudfs.gapper.in/api
-client_id: 5a2fe5921a81b4c7fe1f8a32fe1c0268
-client_secret: 2e35f59e419d1cbc62ce24043aa0c229
-
 # client在担任client的服务器需要指定client项
 client:
     # 在没有指定选择的cloud时，默认使用的配置，在client角色的站点配置
-    default: qiniu-client
+    default: qiniu
     # 各类cloud的配置信息，如qiniu, abc
-    qiniu-client:
+    qiniu:
         # 使用的云接口: qiniu
         driver: qiniu
-        # 当前云所使用的bucket
-        bucket: app-brand
-        # 图像裁剪，最大宽度
-        image-max-width: 150
-        # 图像裁剪，最大高度
-        image-max-height: 150
+        rpc:
+            url: http://YOUR-RPC-URL/PATH
+            server: qiniu
+            client_id: YOUR-CLIENT-ID
+            client_secret: YOUR-CLIENT-SECRET
+        # callbacks:
+        #    success: "\Name\To\Class::method"
+        #    fail: "\Name\To\Class::method"
+        #    always: "\Name\To\Class::method"
         # 用户自定义当前client支持的文件上传方式
         options:
+            # mode: direct or via-server
+            mode: direct
+            # 当前云所使用的bucket
+            bucket: BUCKET-NAME
             # 上传文件的地址
-            #url: http://up.qiniu.com/
+            url: http://up.qiniu.com/
             #也可以上传到本地
-            url: /ajax/cloudfs/qiniu/upload
-            #上传成功后的客户端回调函数
+            #url: /ajax/cloudfs/qiniu/upload
+            #browser/js上传成功后的客户端回调函数
             callback: /ajax/cloudfs/qiniu/parseData
             # 自定义数据
             # 数据传送给browser，browser在向云端上传文件时，将附带这些数据
@@ -39,13 +40,21 @@ client:
 
 # 在担任server的服务器需要指定server项
 server:
-    qiniu-server-a:
+    default: qiniu
+    qiniu:
         driver: qiniu
+        # 配置可以访问CloudFS Server的客户端
+        clients:
+            YOUR-CLIENT-ID: YOUR-CLIENT-SECRET
         # 除了driver和options为固定项外，其余项由DRIVER控制
+        # callbacks:
+        #     success: "\Name\To\Class::method"
+        #     fail: "\Name\To\Class::method"
+        #     always: "\Name\To\Class::method"
         # 比如：qiniu会有bucket，而ftp的方式可能就没有
-        bucket: app-brand
         options:
+            bucket: BUCKET-NAME
             #不同的cloud可能或有不同的配置
-            accessKey: XlvRPPcaj1hyvHPE_LkMCqfP9BAeaCn0b1OxPQSd
-            secretKey: MfezOYL7-rNaEyjyfhG1O4IqGWJysBW2BD3Ygh1p
+            accessKey: CLOUD-ACCESS-KEY
+            secretKey: CLOUD-SECRET-KEY
 ...

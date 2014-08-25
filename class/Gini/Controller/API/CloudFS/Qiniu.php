@@ -11,10 +11,10 @@ namespace Gini\Controller\API\CloudFS;
 
 class Qiniu extends \Gini\Controller\API
 {
-    private function getConfig()
+    private function getOptions()
     {
         $sess = $_SESSION['cloudfs.rpc.qiniu.config'];
-        return $sess['config'];
+        return $sess['options'];
     }
 
     private function getBucketName()
@@ -23,19 +23,20 @@ class Qiniu extends \Gini\Controller\API
         return $sess['bucket'];
     }
 
-    public function actionInit($bucket)
+    public function actionInit($serverKey)
     {
         $config = \Gini\Config::get('cloudfs.server');
-        foreach ($config as $c) {
-            if ($c['driver']==='qiniu' && $c['bucket']===$bucket) {
-                $config = $c['options'];
-                $_SESSION['cloudfs.rpc.qiniu.config'] = [
-                    'bucket'=> $bucket
-                    ,'config'=> $config
-                ];
-                break;
-            }
+        if (!isset($config[$serverKey])) {
+            $config = $config[$config['default']];
         }
+        else {
+            $config = $config[$serverKey];
+        }
+        $options = $config['options'];
+        $_SESSION['cloudfs.rpc.qiniu.config'] = [
+            'bucket'=> $options['bucket']
+            ,'options'=> $options
+        ];
     }
 
     // 暂时不允许客户端自定义filename
@@ -51,7 +52,7 @@ class Qiniu extends \Gini\Controller\API
         require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
 
         $bucket = $this->getBucketName();
-        $config = $this->getConfig();
+        $config = $this->getOptions();
 
         if (!$config || !$bucket) return;
 
@@ -78,7 +79,7 @@ class Qiniu extends \Gini\Controller\API
     public function actionIsFromQiniuServer($data, $iAccessKey, $encodedData)
     {
         $bucket = $this->getBucketName();
-        $config = $this->getConfig();
+        $config = $this->getOptions();
 
         if (!$config || !$bucket) return;
 

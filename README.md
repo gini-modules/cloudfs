@@ -45,6 +45,8 @@ client:
            always: "\Name\To\Class::method"
        options:
            mode: "direct"  # or "via-server"
+           bucket: app-brand
+           # params
 
 # 在担任server的服务器需要指定server项
 server:
