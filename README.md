@@ -40,6 +40,7 @@ client:
            client_id: CLIENTID
            client_secret: CLIENTSECRET
        callbacks:
+           prepare: "\Name\To\Class::method"
            success: "\Name\To\Class::method"
            fail: "\Name\To\Class::method"
            always: "\Name\To\Class::method"
@@ -57,6 +58,7 @@ server:
        clients:
            CLIENTID: CLIENTSECRET
        callbacks:
+           prepare: "\Name\To\Class::method"
            success: "\Name\To\Class::method"
            fail: "\Name\To\Class::method"
            always: "\Name\To\Class::method"
@@ -75,6 +77,9 @@ require(['cloudfs'], function(CloudFS) {
  var fs = new CloudFS('qiniu');
 
  fs.upload(file, {
+     prepare: function() {
+        return true; // 如果返回false则不进行上传
+     },
      progress: function(progress) {
         // progress: {
         //      total: NUMBER,
@@ -97,6 +102,7 @@ require(['cloudfs'], function(CloudFS) {
 
  // or deferred mode
  fs.upload(file)
+ .prepare(function(){})
  .progress(function(){})
  .success(function(){})
  .fail(function(){})
