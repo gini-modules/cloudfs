@@ -1,7 +1,0 @@
----
-cloudfs.is_allowed_to[upload]:
-- callback:APP-CALLBACK::FUNCTION
-
-cloudfs.qiniu_callback:
-- callback:APP-CALLBACK::FUNCTION
-...

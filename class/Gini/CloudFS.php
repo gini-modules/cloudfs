@@ -71,9 +71,12 @@ namespace Gini
             if (method_exists($iCloud, $method)) {
                 // action的取值：upload/getImageURL/getThumbURL/getUploadConfig
                 $action = strtolower($method);
-                $hasAccess = \Gini\Event::trigger("cloudfs.is_allowed_to[$action]", $this, $action);
-                // 除非明确返回false，否走都认为用户是有权限的
-                if (false===$hasAccess) return;
+                $callbacks = $configClient['callbacks'];
+                if (isset($callbacks) && is_array($callbacks) && isset($callbacks['prepare'])) {
+                    $hasAccess = call_user_func($callbacks['prepare'], $action, $params);
+                    // 除非明确返回false，否走都认为用户是有权限的
+                    if (false===$hasAccess) return;
+                }
 
                 return call_user_func_array(array($iCloud, $method), $params);
             }

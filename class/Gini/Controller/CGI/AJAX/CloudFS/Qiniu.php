@@ -23,11 +23,13 @@ class Qiniu extends \Gini\Controller\CGI
     public function actionCallback()
     {
         $form = $this->form();
-        $client = $form['x:client'];
+        $client = $form['client'];
         $cfs = \Gini\IoC::construct('\Gini\CloudFS', $client);
         $bool = $cfs->isFromQiniuServer();
         if (!$bool) return $this->showNothing();
-        $result = $cfs->runServerCallback($this->form());
+        $result = $cfs->runServerCallback([
+            'hash'=>$form['hash'], 
+            'key'=>$form['key']]);
         return $this->showJSON($result);
     }
 

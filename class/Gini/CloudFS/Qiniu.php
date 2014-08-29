@@ -67,6 +67,30 @@ class Qiniu extends \Gini\CloudFS\Cloud
         return $token;
     }
 
+    private function _filterResult($data, $error)
+    {
+        $result = false;
+        $callbacks = (array)$this->_config['callbacks'];
+        if ($error) {
+            if (isset($callbacks['fail'])) {
+                $result = call_user_func($callbacks['fail'], $error);
+            }
+        }
+        else {
+            if (isset($callbacks['success'])) {
+                $result = call_user_func($callbacks['success'], $data);
+            }
+            else {
+                $result = $data;
+            }
+        }
+        
+        if (isset($callbacks['always'])) {
+            $result = call_user_func($callbacks['always'], [$data, $error]);
+        }
+        return $result;
+    }
+
     public function upload($file)
     {
         $result = false;
@@ -79,24 +103,7 @@ class Qiniu extends \Gini\CloudFS\Cloud
         $content = file_get_contents($file);
         list($ret, $err) = \Qiniu_Put($token, $filename, $content, null);
 
-        $callbacks = (array)$this->_config['callbacks'];
-        if ($err) {
-            if (isset($callbacks['fail'])) {
-                $result = call_user_func($callbacks['fail'], $err);
-            }
-        }
-        else {
-            if (isset($callbacks['success'])) {
-                $result = call_user_func($callbacks['success'], $ret);
-            }
-            else {
-                $result = $ret;
-            }
-        }
-        
-        if (isset($callbacks['always'])) {
-            $result = call_user_func($callbacks['always'], [$ret, $err]);
-        }
+        $result = $this->_filterResult($ret, $err);
 
         return $result;
     }
@@ -115,9 +122,10 @@ class Qiniu extends \Gini\CloudFS\Cloud
         return !!$result;
     }
 
-    public function runServerCallback($data)
+    public function runServerCallback(array $data)
     {
-        $result = \Gini\Event::trigger("cloudfs.qiniu_callback", $this, $data);
+        $error = ($data['key'] && $data['hash']) ? false : new \Qiniu_Error(0, 'Response error from qiniu server.');
+        $result = $this->_filterResult($data, $error);
         return $result;
     }
 
