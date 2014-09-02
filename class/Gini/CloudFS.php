@@ -66,6 +66,7 @@ namespace Gini
             $driver = $configClient['driver'];
 
             if (!$driver) return;
+
             $className = "\\Gini\\CloudFS\\{$driver}";
             $iCloud = \Gini\IoC::construct($className, $configClient);
             if (method_exists($iCloud, $method)) {

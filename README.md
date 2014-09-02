@@ -46,24 +46,14 @@ client:
            fail: "\Name\To\Class::method"
            always: "\Name\To\Class::method"
        options:
-           mode: "direct"  # or "via-server"
-           bucket: BUCKETNAME
-           # params
-           # 上传文件的地址
-           url: http://up.qiniu.com/
-           #也可以上传到本地
-           #url: /ajax/cloudfs/qiniu/upload
-           #browser/js上传成功后的客户端回调函数
-           callback: /ajax/cloudfs/qiniu/parseData
            # 自定义数据
            # 数据传送给browser，browser在向云端上传文件时，将附带这些数据
            # 系统占用了'cfs:'开头的自定义变量，请使用时注意
-           params:
-               #以下是七牛支持的自定义变量
-               #x:callbackUrl: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
-               # CloudFS定义的，用无状态的保持client name
-               #x:client: qiniu-client
-               #x:callbackBody: key=$(key)&client=$(x:client)&hash=$(etag)
+           #以下是七牛支持的自定义变量
+           #x:callbackUrl: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
+           # CloudFS定义的，用无状态的保持client name
+           #x:client: qiniu
+           #x:callbackBody: key=$(key)&client=$(x:client)&hash=$(etag)
 
 # 在担任server的服务器需要指定server项
 server:
@@ -83,6 +73,16 @@ server:
            bucket: BUCKETNAME
            accessKey: CLOUDACCESSKEY
            secretKey: CLOUDSECRETKEY
+       client_options:
+           mode: "direct"  # or "via-server"
+           # params
+           # 上传文件的地址
+           url: http://up.qiniu.com/
+           #也可以上传到本地
+           #url: /ajax/cloudfs/qiniu/upload
+           #browser/js上传成功后的客户端回调函数
+           callback: /ajax/cloudfs/qiniu/parseData
+           # params被预留了，请不要使用
 ...
 
 ```

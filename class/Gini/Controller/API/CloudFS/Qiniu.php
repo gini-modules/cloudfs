@@ -9,6 +9,10 @@
 
 namespace Gini\Controller\API\CloudFS;
 
+require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
+require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/io.php');
+require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/fop.php');
+
 class Qiniu extends \Gini\Controller\API
 {
     private function getOptions()
@@ -93,5 +97,14 @@ class Qiniu extends \Gini\Controller\API
             return false;
         }
         return true;
+    }
+
+    public function actionGetImageURL($file)
+    {
+        $bucket = $this->getBucketName();
+        if (!$bucket) return;
+        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $file);
+        $imgViewUrl .= '?' . time();
+        return $imgViewUrl;
     }
 }

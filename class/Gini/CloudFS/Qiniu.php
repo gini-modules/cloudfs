@@ -15,34 +15,11 @@ require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/fop.php');
 
 class Qiniu extends \Gini\CloudFS\Cloud
 {
-    const UPLOAD_DIRECT = 'direct';
-    const UPLOAD_VIA_SERVER = 'via-server';
-
     private $_config = [];
     public function __construct($config)
     {
         $this->_config = $config;
         $this->getRPC('cloudfs', $this->_config['rpc'])->qiniu->init($this->_config['rpc']['server']);
-    }
-
-    public function getUploadConfig()
-    {
-        $config = $this->_config;
-        $options = $config['options'];
-        $data = [
-            'url'=> $options['url']
-            ,'callback'=> $options['callback']
-            ,'params'=> (array)$options['params']
-        ];
-        if ($options['mode']===self::UPLOAD_DIRECT) {
-            $filename = $this->_getFilename();
-            $keys = $this->_getToken($filename);
-
-            $data['params']['key'] = $filename;
-            $data['params']['token'] = $keys;
-        }
-
-        return $data;
     }
 
     private function _getFilename()
@@ -55,14 +32,10 @@ class Qiniu extends \Gini\CloudFS\Cloud
     private function _getToken($filename, $cbkURL=null, $cbkBody=null)
     {
         $options = $this->_config['options'];
-        $bucket = $options['bucket'];
-        if (!$bucket) return;
         $token = $this->getRPC('cloudfs')->qiniu->getKeys([
-            'bucket'=> $bucket
-            ,'method'=> 'upload'
-            ,'file'=> $filename
-            ,'callbackUrl'=> $cbkURL ?: $options['params']['x:callbackUrl']
-            ,'callbackBody'=> $cbkBody ?: $options['params']['x:callbackBody']
+            'file'=> $filename
+            ,'callbackUrl'=> $cbkURL ?: $options['x:callbackUrl']
+            ,'callbackBody'=> $cbkBody ?: $options['x:callbackBody']
         ]);
         return $token;
     }
@@ -131,140 +104,38 @@ class Qiniu extends \Gini\CloudFS\Cloud
 
     public function getImageURL($filename)
     {
-        $options = $this->_config['options'];
-        $bucket = $options['bucket'];
-        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $filename);
-        $imgViewUrl .= '?' . time();
-        return $imgViewUrl;
-    }
-
-    /*
-    public function getThumbURL($filename, $width=0, $height=0)
-    {
-        $options = $this->_config['options'];
-        $bucket = $options['bucket'];
-        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $filename);
-        $imgViewUrl .= '?' . time();
-        $opts = [
-            1   // mode
-            ,'w', $width?:$this->_config['image-max-width']
-            ,'h', $height?:$this->_config['image-max-height']
-        ];
-        $imgViewUrl .= '&imageView/' . implode('/', $opts);
-        return $imgViewUrl;
-    }
-     */
-
-    /*
-    private $_options;
-    private $_bucket;
-    private $_config;
-    public function __construct($client)
-    {
-        $config = \Gini\Config::get('cloudfs.client');
-        $config = $config[$client];
-        $this->_bucket = $config['bucket'];
-        $this->_options = $config['options'];
-        unset($config['options']);
-        $this->_config = $config;
-        $this->getRPC('cloudfs')->qiniu->init($this->_bucket);
-    }
-
-    public function getImageURL($filename)
-    {
-        $bucket = $this->_bucket;
-        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $filename);
-        $imgViewUrl .= '?' . time();
-        return $imgViewUrl;
-    }
-
-    public function getThumbURL($filename, $width=0, $height=0)
-    {
-        $bucket = $this->_bucket;
-        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $filename);
-        $imgViewUrl .= '?' . time();
-        $opts = [
-            1   // mode
-            ,'w', $width?:$this->_config['image-max-width']
-            ,'h', $height?:$this->_config['image-max-height']
-        ];
-        $imgViewUrl .= '&imageView/' . implode('/', $opts);
-        return $imgViewUrl;
-    }
-
-    private function _getFilename()
-    {
-        $host = $_SERVER['HTTP_HOST'] ?: $_SERVER['SERVER_NAME'];
-        $filename = $this->getRPC('cloudfs')->qiniu->getURI($host);
-        return $filename;
-    }
-
-    private function _getToken($filename, $cbkURL=null, $cbkBody=null)
-    {
-        $bucket = $this->_bucket;
-        $token = $this->getRPC('cloudfs')->qiniu->getKeys([
-            'bucket'=> $bucket
-            ,'method'=> 'upload'
-            ,'file'=> $filename
-            ,'callbackUrl'=> $cbkURL ?: $this->_options['params']['x:callbackUrl']
-            ,'callbackBody'=> $cbkBody ?: $this->_options['params']['x:callbackBody']
-        ]);
-        return $token;
-    }
-
-    public function upload($file)
-    {
-        $result = false;
-
-        $file = $file['tmp_name'];
-        if (!$file) return $result;
-        
-        $filename = $this->_getFilename();
-        $content = file_get_contents($file);
-        $token = $this->_getToken($filename);
-        list($ret, $err) = \Qiniu_Put($token, $filename, $content, null);
-
-        $result = $err ? $result : $ret;
-        return $result;
+        $url = $this->getRPC('cloudfs')->qiniu->getImageURL($filename);
+        return $url;
     }
 
     public function getUploadConfig()
     {
-        $config = $this->_options;
-        $config['params'] = $config['params'] ?: [];
-        // 如果上传到的非当前host，则认为是直接云传，七牛可以提供token
-        $myHost = $_SERVER['HTTP_HOST'];
-        $uploadTo = parse_url($config['url']);
-        $uHost = $uploadTo['host'];
-        if ($uHost && $uHost!==$myHost) {
+        $config = $this->_config;
+        $configFromServer = $this->getRPC('cloudfs')->getClientConfig($config['rpc']['server']);
+        if (empty($configFromServer) || !is_array($configFromServer)) return;
+
+        $data = [];
+
+        if (isset($configFromServer['mode'])) {
+            $mode = $configFromServer['mode'];
+            unset($configFromServer['mode']);
+        }
+
+        foreach ($configFromServer as $k=>$v) {
+            $data[$k] = $v;
+        }
+
+        $data['params'] = $config['options'];
+
+        if ($mode==='direct') {
             $filename = $this->_getFilename();
-            $keys = $this->_getToken($filename, $config['params']['callbackUrl'], $config['params']['callbackBody']);
+            $keys = $this->_getToken($filename);
 
-            $config['params']['key'] = $filename;
-            $config['params']['token'] = $keys;
+            $data['params']['key'] = $filename;
+            $data['params']['token'] = $keys;
         }
 
-        return $config;
+        return $data;
     }
 
-    public function isFromQiniuServer()
-    {
-        $authstr = $_SERVER['HTTP_AUTHORIZATION'];
-        if (strpos($authstr, 'QBox ')!=0) {
-            return false;
-        }
-        $auth = explode(':', substr($authstr, 5));
-        if (sizeof($auth)!=2) return false;
-        $data = $_SERVER['REQUEST_URI'] . "\n" . file_get_contents('php://input');
-
-        $result = $this->getRPC('cloudfs.qiniu')->qiniu->isFromQiniuServer($data, $auth[0], $auth[1]);
-        return !!$result;
-    }
-
-    public function runServerCallback($data)
-    {
-        $result = \Gini\Event::trigger("cloudfs.qiniu_callback", $this, $data);
-        return $result;
-    }
-     */
 }
