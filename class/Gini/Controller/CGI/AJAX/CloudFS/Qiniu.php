@@ -33,18 +33,7 @@ class Qiniu extends \Gini\Controller\CGI
         return $this->showJSON($result);
     }
 
-    public function actionParseData()
-    {
-        $form = $this->form();
-        $data = $form['data'];
-        if (!$data['key']) return $this->showNothing();
-        $cloud = $form['cloud'];
-        $cloud = \Gini\IoC::construct('\Gini\CloudFS', $cloud);
-        $image = $cloud->getImageURL($data['key']);
-        return $this->showJSON($image);
-    }
-
-    public function actionUpload()
+    public function actionUpload($client=null)
     {
         $files = $this->form('files');
         if (empty($files)) return $this->showNothing();
@@ -54,8 +43,6 @@ class Qiniu extends \Gini\Controller\CGI
         $form = $this->form('post');
         if (!$form['token']) return $this->showNothing();
         **/
-        $form = $this->form('post');
-        $client = $form['cfs:cloud'];
         $cfs = \Gini\IoC::construct('\Gini\CloudFS', $client);
         $result = $cfs->upload($file);
         return $this->showJSON($result);

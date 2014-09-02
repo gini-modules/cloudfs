@@ -69,11 +69,11 @@ class Qiniu extends \Gini\Controller\API
         $filename = $filename ? "{$bucket}:{$filename}" : $bucket;
         $putPolicy = new \Qiniu_RS_PutPolicy($filename);
 
-        if (isset($params['callbackBody'])) {
-            $putPolicy->CallbackBody = $params['callbackBody'];
+        if (isset($params['callback_body'])) {
+            $putPolicy->CallbackBody = $params['callback_body'];
         }
-        if (isset($params['callbackUrl'])) {
-            $putPolicy->CallbackUrl = $params['callbackUrl'];
+        if (isset($params['callback_url'])) {
+            $putPolicy->CallbackUrl = $params['callback_url'];
         }
 
         $token = $putPolicy->Token(null);

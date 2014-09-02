@@ -30,13 +30,13 @@ gini cache && gini config update
 # client在担任client的服务器需要指定client项
 client:
    # 在没有指定选择的cloud时，默认使用的配置，在client角色的站点配置
-   default: qiniu
+   default: qiniu_client
    # 各类cloud的配置信息，如qiniu, abc
-   qiniu:
+   qiniu_client:
        driver: Qiniu
        rpc:
            url: "http://cloudfs.gapper.in/api"
-           server: qiniu
+           server: qiniu_server
            client_id: CLIENTID
            client_secret: CLIENTSECRET
        callbacks:
@@ -46,19 +46,16 @@ client:
            fail: "\Name\To\Class::method"
            always: "\Name\To\Class::method"
        options:
-           # 自定义数据
-           # 数据传送给browser，browser在向云端上传文件时，将附带这些数据
-           # 系统占用了'cfs:'开头的自定义变量，请使用时注意
+           #mode: direct or via-server
+           mode: direct
            #以下是七牛支持的自定义变量
-           #x:callbackUrl: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
-           # CloudFS定义的，用无状态的保持client name
-           #x:client: qiniu
-           #x:callbackBody: key=$(key)&client=$(x:client)&hash=$(etag)
+           callback_url: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
+           callback_body: key=$(key)&client=qiniu_client&hash=$(etag)
 
 # 在担任server的服务器需要指定server项
 server:
-   default: qiniu
-   qiniu:
+   default: qiniu_server
+   qiniu_server:
        driver: Qiniu
        # 配置可以访问CloudFS Server的客户端
        clients:
@@ -73,25 +70,13 @@ server:
            bucket: BUCKETNAME
            accessKey: CLOUDACCESSKEY
            secretKey: CLOUDSECRETKEY
-       client_options:
-           mode: "direct"  # or "via-server"
-           # params
-           # 上传文件的地址
-           url: http://up.qiniu.com/
-           #也可以上传到本地
-           #url: /ajax/cloudfs/qiniu/upload
-           #browser/js上传成功后的客户端回调函数
-           callback: /ajax/cloudfs/qiniu/parseData
-           # params被预留了，请不要使用
 ...
 
 ```
 #### 3. 前端调用
 ```javascript
 require(['cloudfs'], function(CloudFS) {
- var fs = new CloudFS('qiniu');
-
- fs.upload(file, {
+ CloudFS.upload('qiniu_client', file, {
      progress: function(progress) {
         // progress: {
         //      total: NUMBER,
@@ -113,7 +98,7 @@ require(['cloudfs'], function(CloudFS) {
  });
 
  // or deferred mode
- fs.upload(file)
+ CloudFS.upload('qiniu_client', file)
  .progress(function(){})
  .success(function(){})
  .fail(function(){})

@@ -19,12 +19,4 @@ class CloudFS extends \Gini\Controller\API
         if ($config[$server]['clients'][$clientId]!==$clientSecret) return false;
         return true;
     }
-
-    public function actionGetClientConfig($server)
-    {
-        $config = (array)\Gini\Config::get('cloudfs.server');
-        if (!isset($config[$server])) return false;
-        $data = $config[$server]['client_options'];
-        return $data;
-    }
 }

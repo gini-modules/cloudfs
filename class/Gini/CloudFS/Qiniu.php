@@ -16,8 +16,10 @@ require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/fop.php');
 class Qiniu extends \Gini\CloudFS\Cloud
 {
     private $_config = [];
-    public function __construct($config)
+    private $_client;
+    public function __construct($client, $config)
     {
+        $this->_client = $client;
         $this->_config = $config;
         $this->getRPC('cloudfs', $this->_config['rpc'])->qiniu->init($this->_config['rpc']['server']);
     }
@@ -34,8 +36,8 @@ class Qiniu extends \Gini\CloudFS\Cloud
         $options = $this->_config['options'];
         $token = $this->getRPC('cloudfs')->qiniu->getKeys([
             'file'=> $filename
-            ,'callbackUrl'=> $cbkURL ?: $options['x:callbackUrl']
-            ,'callbackBody'=> $cbkBody ?: $options['x:callbackBody']
+            ,'callback_url'=> $cbkURL ?: $options['callback_url']
+            ,'callback_body'=> $cbkBody ?: $options['callback_body']
         ]);
         return $token;
     }
@@ -111,31 +113,42 @@ class Qiniu extends \Gini\CloudFS\Cloud
     public function getUploadConfig()
     {
         $config = $this->_config;
-        $configFromServer = $this->getRPC('cloudfs')->getClientConfig($config['rpc']['server']);
-        if (empty($configFromServer) || !is_array($configFromServer)) return;
+        $options = $config['options'];
 
         $data = [];
+        $params = [];
 
-        if (isset($configFromServer['mode'])) {
-            $mode = $configFromServer['mode'];
-            unset($configFromServer['mode']);
+        if (isset($options['callback_url'])) {
+            $params['x:callbackUrl'] = $options['callback_url'];
         }
 
-        foreach ($configFromServer as $k=>$v) {
-            $data[$k] = $v;
+        if (isset($options['callback_body'])) {
+            $params['x:callbackBody'] = $options['callback_body'];
         }
 
-        $data['params'] = $config['options'];
+        if ($options['mode']==='direct') {
+            $data['url'] = 'http://up.qiniu.com';
 
-        if ($mode==='direct') {
             $filename = $this->_getFilename();
             $keys = $this->_getToken($filename);
 
-            $data['params']['key'] = $filename;
-            $data['params']['token'] = $keys;
+            $params['key'] = $filename;
+            $params['token'] = $keys;
+        }
+        else {
+            $data['url'] = '/ajax/cloudfs/qiniu/upload/' . $this->_client;
         }
 
+        $data['params'] = $params;
+
         return $data;
+    }
+
+    public function parseData(array $data=[]) 
+    {
+        if (!isset($data['key'])) return;
+        $image = $this->getImageURL($data['key']);
+        return $image;
     }
 
 }

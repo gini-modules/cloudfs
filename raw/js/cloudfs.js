@@ -36,8 +36,6 @@ define('cloudfs', ['jquery'], function($) {
             }
         }
 
-        form.append('cfs:cloud', that.cloud);
-
         var xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener('progress', function(evt) {
@@ -55,16 +53,10 @@ define('cloudfs', ['jquery'], function($) {
             var status = evt.target.status;
             if (status==200) {
                 var data = JSON.parse(xhr.responseText);
-                if (config.callback) {
-                    $.post(config.callback, {cloud: that.cloud, data: data}, function(data) {
-                        if (handler.success) handler.success(data);
-                        if (handler.always) handler.always(evt);
-                    });
-                }
-                else {
+                $.post('/ajax/cloudfs/parseData', {cloud: that.cloud, data: data}, function(data) {
                     if (handler.success) handler.success(data);
                     if (handler.always) handler.always(evt);
-                }
+                });
             }
         }, false);
 
@@ -123,6 +115,11 @@ define('cloudfs', ['jquery'], function($) {
         this.handlers.always= method;
     };
 
-    return CloudFS;
+    return {
+        upload: function(cloud, file, handlers) {
+            var cfs = new CloudFS(cloud);
+            return cfs.upload(file, handlers);
+        }
+    };
 
 });

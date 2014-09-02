@@ -17,4 +17,6 @@ abstract class Cloud
 
     abstract public function getImageURL($filename);
 
+    abstract public function getUploadConfig();
+
 }
