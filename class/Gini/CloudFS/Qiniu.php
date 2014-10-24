@@ -149,6 +149,14 @@ class Qiniu extends \Gini\CloudFS\Cloud
         if (!isset($data['key'])) return;
         if (!isset($data['hash'])) return;
         $image = $this->getImageURL($data['key'], $data['hash']);
+
+        $options = $this->_config['options'];
+        if ($options['image_view']) {
+            $image .=  '?' . $options['image_view'] . '&_=' . time();
+        }
+        else {
+            $image .=  '?' . time();
+        }
         return $image;
     }
 

@@ -105,7 +105,6 @@ class Qiniu extends \Gini\Controller\API
         if (!$bucket) return;
 
         $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $file);
-        $imgViewUrl .= '?' . time();
         return $imgViewUrl;
     }
 }

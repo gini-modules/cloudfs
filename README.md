@@ -48,6 +48,8 @@ client:
        options:
            #mode: direct or via-server
            mode: direct
+           #image_view: 七牛的缩略图限制
+           image_view: imageView2/2/w/2000/h/2000/format/jpg
            #以下是七牛支持的自定义变量
            callback_url: http://YOUR-DOMAIN/ajax/cloudfs/qiniu/callback
            callback_body: key=$(key)&client=qiniu_client&hash=$(etag)
