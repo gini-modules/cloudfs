@@ -104,9 +104,9 @@ class Qiniu extends \Gini\CloudFS\Cloud
         return $result;
     }
 
-    public function getImageURL($filename)
+    public function getImageURL($filename, $hash=null)
     {
-        $url = $this->getRPC('cloudfs')->qiniu->getImageURL($filename);
+        $url = $this->getRPC('cloudfs')->qiniu->getImageURL($filename, $hash);
         return $url;
     }
 
@@ -147,7 +147,8 @@ class Qiniu extends \Gini\CloudFS\Cloud
     public function parseData(array $data=[]) 
     {
         if (!isset($data['key'])) return;
-        $image = $this->getImageURL($data['key']);
+        if (!isset($data['hash'])) return;
+        $image = $this->getImageURL($data['key'], $data['hash']);
         return $image;
     }
 
