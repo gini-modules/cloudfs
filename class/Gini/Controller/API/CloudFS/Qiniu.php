@@ -99,12 +99,12 @@ class Qiniu extends \Gini\Controller\API
         return true;
     }
 
-    public function actionGetImageURL($file)
+    public function actionGetImageURL($file, $hash=null)
     {
         $bucket = $this->getBucketName();
         if (!$bucket) return;
+
         $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$bucket}.qiniudn.com", $file);
-        $imgViewUrl .= '?' . time();
         return $imgViewUrl;
     }
 }

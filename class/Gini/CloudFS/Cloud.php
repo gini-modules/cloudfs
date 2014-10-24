@@ -15,7 +15,7 @@ abstract class Cloud
 
     abstract public function upload($file);
 
-    abstract public function getImageURL($filename);
+    abstract public function getImageURL($filename, $hash=null);
 
     abstract public function getUploadConfig();
 
