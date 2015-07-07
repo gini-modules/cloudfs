@@ -1,5 +1,5 @@
 /*
-var cfs = new CloudFS('qiniu');
+var cfs = new CloudFS('name');
 
 // e.g 1
 cfs.upload(data, {
@@ -76,7 +76,7 @@ define('cloudfs', ['jquery'], function($) {
     };
 
     var CloudFS = function(cloud) {
-        this.configURL = '/ajax/cloudfs/getConfig';
+        this.configURL = '/ajax/cloudfs/get-config';
         this.cloud = cloud || '';
         this.handlers = {};
     };

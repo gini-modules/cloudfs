@@ -103,10 +103,12 @@ class Qiniu extends \Gini\Controller\API
     {
         $bucket = $this->getBucketName();
         if (!$bucket) return;
-        $server_confs = \Gini\Config::get('cloudfs.server');
-        $domain = $server_confs['qiniu']['domain']?:$bucket.'.qiniudn.com';
-        $imgViewUrl = \Qiniu_RS_MakeBaseUrl("{$domain}", $file);
-        $imgViewUrl .= '?' . time();
+
+        $bucket = $this->getBucketName();
+        $config = $this->getOptions();
+
+        $domain = $config['domain'] ?: $bucket.'.qiniudn.com';
+        $imgViewUrl = \Qiniu_RS_MakeBaseUrl($domain, $file);
         return $imgViewUrl;
     }
 }
