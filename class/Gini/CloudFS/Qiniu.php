@@ -71,9 +71,7 @@ class Qiniu extends \Gini\CloudFS\Cloud
         
         $filename = $this->_getFilename();
         $token = $this->_getToken($filename);
-        // $content = file_get_contents($file);
-        
-        // list($ret, $err) = \Qiniu_Put($token, $filename, $content, null);
+
         $upManager = new \Qiniu\Storage\UploadManager();
         list($ret, $err) = $upManager->putFile($token, $filename, $file);
 
@@ -98,7 +96,7 @@ class Qiniu extends \Gini\CloudFS\Cloud
 
     public function runServerCallback(array $data)
     {
-        $error = ($data['key'] && $data['hash']) ? false : new \Qiniu_Error(0, 'Response error from qiniu server.');
+        $error = ($data['key'] && $data['hash']) ? false : ['code'=>0, 'error'=>'Response error from qiniu server.'];
         $result = $this->_filterResult($data, $error);
         return $result;
     }
@@ -129,10 +127,10 @@ class Qiniu extends \Gini\CloudFS\Cloud
             $data['url'] = 'http://up.qiniu.com';
 
             $filename = $this->_getFilename();
-            $keys = $this->_getToken($filename);
+            $token = $this->_getToken($filename);
 
             $params['key'] = $filename;
-            $params['token'] = $keys;
+            $params['token'] = $token;
         }
         else {
             $data['url'] = '/ajax/cloudfs/qiniu/upload/' . $this->_client;

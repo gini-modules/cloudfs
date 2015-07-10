@@ -53,7 +53,9 @@ define('cloudfs', ['jquery'], function($) {
             var status = evt.target.status;
             if (status==200) {
                 var data = JSON.parse(xhr.responseText);
-                $.post('/ajax/cloudfs/parseData', {cloud: that.cloud, data: data}, function(data) {
+                $.post('/ajax/cloudfs/parse-data', {
+                    cloud: that.cloud, data: data
+                }, function(data) {
                     if (handler.success) handler.success(data);
                     if (handler.always) handler.always(evt);
                 });
