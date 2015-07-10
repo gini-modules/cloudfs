@@ -60,19 +60,6 @@ class Qiniu extends \Gini\Controller\API
 
         $auth = new \Qiniu\Auth($accessKey, $secretKey);
 
-        // $filename = $params['file'];
-        // $filename = $filename ? "{$bucket}:{$filename}" : $bucket;
-        // $putPolicy = new \Qiniu_RS_PutPolicy($filename);
-        //
-        // if (isset($params['callback_body'])) {
-        //     $putPolicy->CallbackBody = $params['callback_body'];
-        // }
-        // if (isset($params['callback_url'])) {
-        //     $putPolicy->CallbackUrl = $params['callback_url'];
-        // }
-        //
-        // $token = $putPolicy->Token(null);
-
         $opts = [];
         if (isset($params['callback_body'])) {
             $opts['callbackBody'] = $params['callback_body'];
