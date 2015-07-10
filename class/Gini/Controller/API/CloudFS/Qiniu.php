@@ -9,19 +9,15 @@
 
 namespace Gini\Controller\API\CloudFS;
 
-require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
-require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/io.php');
-require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/fop.php');
-
 class Qiniu extends \Gini\Controller\API
 {
-    private function getOptions()
+    private function _getOptions()
     {
         $sess = $_SESSION['cloudfs.rpc.qiniu.config'];
         return $sess['options'];
     }
 
-    private function getBucketName()
+    private function _getBucketName()
     {
         $sess = $_SESSION['cloudfs.rpc.qiniu.config'];
         return $sess['bucket'];
@@ -29,6 +25,7 @@ class Qiniu extends \Gini\Controller\API
 
     public function actionInit($serverKey)
     {
+        if (\Gini\CloudFS\Client::isAuthorized())
         $config = \Gini\Config::get('cloudfs.server');
         if (!isset($config[$serverKey])) {
             $config = $config[$config['default']];
@@ -51,39 +48,46 @@ class Qiniu extends \Gini\Controller\API
         return $result;
     }
 
-    public function actionGetKeys($params)
+    public function actionGetToken($params)
     {
-        require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
-
-        $bucket = $this->getBucketName();
-        $config = $this->getOptions();
+        $bucket = $this->_getBucketName();
+        $config = $this->_getOptions();
 
         if (!$config || !$bucket) return;
 
         $config = [ $bucket, $config['accessKey'], $config['secretKey'] ];
         list($bucket, $accessKey, $secretKey) = $config;
 
-        \Qiniu_SetKeys($accessKey, $secretKey);
+        $auth = new \Qiniu\Auth($accessKey, $secretKey);
 
-        $filename = $params['file'];
-        $filename = $filename ? "{$bucket}:{$filename}" : $bucket;
-        $putPolicy = new \Qiniu_RS_PutPolicy($filename);
+        // $filename = $params['file'];
+        // $filename = $filename ? "{$bucket}:{$filename}" : $bucket;
+        // $putPolicy = new \Qiniu_RS_PutPolicy($filename);
+        //
+        // if (isset($params['callback_body'])) {
+        //     $putPolicy->CallbackBody = $params['callback_body'];
+        // }
+        // if (isset($params['callback_url'])) {
+        //     $putPolicy->CallbackUrl = $params['callback_url'];
+        // }
+        //
+        // $token = $putPolicy->Token(null);
 
+        $opts = [];
         if (isset($params['callback_body'])) {
-            $putPolicy->CallbackBody = $params['callback_body'];
+            $opts['callbackBody'] = $params['callback_body'];
         }
         if (isset($params['callback_url'])) {
-            $putPolicy->CallbackUrl = $params['callback_url'];
+            $opts['callbackUrl'] = $params['callback_url'];
         }
-
-        $token = $putPolicy->Token(null);
-        return $token;
+        
+        return $auth->uploadToken($bucket, null, 3600, $opts);
     }
 
     public function actionIsFromQiniuServer($data, $iAccessKey, $encodedData)
     {
-        $bucket = $this->getBucketName();
-        $config = $this->getOptions();
+        $bucket = $this->_getBucketName();
+        $config = $this->_getOptions();
 
         if (!$config || !$bucket) return;
 
@@ -101,14 +105,15 @@ class Qiniu extends \Gini\Controller\API
 
     public function actionGetImageURL($file)
     {
-        $bucket = $this->getBucketName();
+        $bucket = $this->_getBucketName();
         if (!$bucket) return;
 
-        $bucket = $this->getBucketName();
-        $config = $this->getOptions();
+        $bucket = $this->_getBucketName();
+        $config = $this->_getOptions();
 
         $domain = $config['domain'] ?: $bucket.'.qiniudn.com';
-        $imgViewUrl = \Qiniu_RS_MakeBaseUrl($domain, $file);
+        // $imgViewUrl = \Qiniu_RS_MakeBaseUrl($domain, $file);
+        $imgViewUrl = "http://{$domain}/{$file}";
         return $imgViewUrl;
     }
 }

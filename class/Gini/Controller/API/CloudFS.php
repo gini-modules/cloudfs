@@ -13,10 +13,7 @@ class CloudFS extends \Gini\Controller\API
 {
     public function actionAuthorize($server, $clientId, $clientSecret)
     {
-        $config = (array)\Gini\Config::get('cloudfs.server');
-        if (!isset($config[$server])) return false;
-        if (!isset($config[$server]['clients'][$clientId])) return false;
-        if ($config[$server]['clients'][$clientId]!==$clientSecret) return false;
-        return true;
+        if (!\Gini\CloudFS\Client::authorize($server, $clientId, $clientSecret)) return false;
+        return session_id();
     }
 }

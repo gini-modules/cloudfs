@@ -9,10 +9,6 @@
 
 namespace Gini\CloudFS;
 
-require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/rs.php');
-require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/io.php');
-require_once(APP_PATH.'/vendor/qiniu/php-sdk/qiniu/fop.php');
-
 class Qiniu extends \Gini\CloudFS\Cloud
 {
     private $_config = [];
@@ -34,10 +30,10 @@ class Qiniu extends \Gini\CloudFS\Cloud
     private function _getToken($filename, $cbkURL=null, $cbkBody=null)
     {
         $options = $this->_config['options'];
-        $token = $this->getRPC('cloudfs')->qiniu->getKeys([
-            'file'=> $filename
-            ,'callback_url'=> $cbkURL ?: $options['callback_url']
-            ,'callback_body'=> $cbkBody ?: $options['callback_body']
+        $token = $this->getRPC('cloudfs')->qiniu->getToken([
+            'file'=> $filename,
+            'callback_url'=> $cbkURL ?: $options['callback_url'],
+            'callback_body'=> $cbkBody ?: $options['callback_body']
         ]);
         return $token;
     }
@@ -75,8 +71,11 @@ class Qiniu extends \Gini\CloudFS\Cloud
         
         $filename = $this->_getFilename();
         $token = $this->_getToken($filename);
-        $content = file_get_contents($file);
-        list($ret, $err) = \Qiniu_Put($token, $filename, $content, null);
+        // $content = file_get_contents($file);
+        
+        // list($ret, $err) = \Qiniu_Put($token, $filename, $content, null);
+        $upManager = new \Qiniu\Storage\UploadManager();
+        list($ret, $err) = $upManager->putFile($token, $filename, $file);
 
         $result = $this->_filterResult($ret, $err);
 

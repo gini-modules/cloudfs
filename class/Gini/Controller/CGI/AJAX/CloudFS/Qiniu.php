@@ -24,7 +24,7 @@ class Qiniu extends \Gini\Controller\CGI
     {
         $form = $this->form();
         $client = $form['client'];
-        $cfs = \Gini\IoC::construct('\Gini\CloudFS', $client);
+        $cfs = \Gini\IoC::construct('\Gini\CloudFS\Client', $client);
         $bool = $cfs->isFromQiniuServer();
         if (!$bool) return $this->showNothing();
         $result = $cfs->runServerCallback([
@@ -43,7 +43,7 @@ class Qiniu extends \Gini\Controller\CGI
         $form = $this->form('post');
         if (!$form['token']) return $this->showNothing();
         **/
-        $cfs = \Gini\IoC::construct('\Gini\CloudFS', $client);
+        $cfs = \Gini\IoC::construct('\Gini\CloudFS\Client', $client);
         $result = $cfs->upload($file);
         return $this->showJSON($result);
     }

@@ -7,37 +7,11 @@
 * @date 2014-07-11
  */
 
-namespace Gini 
+namespace Gini\CloudFS
 {
 
-    trait CloudFSTrait
+    class Client
     {
-        /**
-            * @brief 获取rpc实例
-         */
-        private static $_RPC = [];
-        public function getRPC($type, $config=null)
-        {
-            if (!self::$_RPC[$type] && isset($config) && is_array($config)) {
-                try {
-                    $api = $config['url'];
-                    $client_id = $config['client_id'];
-                    $client_secret = $config['client_secret'];
-                    $rpc = \Gini\IoC::construct('\Gini\RPC', $api, $type);
-                    $bool = $rpc->authorize($config['server'], $client_id, $client_secret);
-                    if ($bool) self::$_RPC[$type] = $rpc;
-                } catch (\Gini\RPC\Exception $e) {
-                    // rpc->authorize调用出现错误
-                }
-            }
-            return self::$_RPC[$type];
-        }
-    }
-
-    class CloudFS
-    {
-
-        use CloudFSTrait;
 
         private $_client;
         private $_driver;
@@ -81,6 +55,19 @@ namespace Gini
 
                 return call_user_func_array(array($iCloud, $method), $params);
             }
+        }
+        
+        public static function authorize($server, $clientId, $clientSecret) {
+            $config = (array)\Gini\Config::get('cloudfs.server');
+            if (!isset($config[$server])) return false;
+            if (!isset($config[$server]['clients'][$clientId])) return false;
+            if ($config[$server]['clients'][$clientId]!==$clientSecret) return false;
+            $_SESSION['cloudfs.client'] = $clientId;
+            return true;
+        }
+        
+        public static function isAuthorized() {
+            return !!$_SESSION['cloudfs.client'];
         }
     }
 }

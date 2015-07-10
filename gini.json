@@ -8,7 +8,7 @@
     },
     "composer": {
         "require": {
-            "qiniu/php-sdk": "v6.1.9"
+            "qiniu/php-sdk": "v7.0.2"
         }
     }
 }
