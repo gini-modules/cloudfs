@@ -74,7 +74,8 @@ define('cloudfs', ['jquery'], function($) {
 
         xhr.open('POST', config.url);
         xhr.send(form);
-
+        
+        return xhr;
     };
 
     var CloudFS = function(cloud) {
@@ -91,7 +92,7 @@ define('cloudfs', ['jquery'], function($) {
             var mHandlers = handler || {};
             var tHandlers = that.handlers || {};
             var rHandlers = $.extend(tHandlers, mHandlers);
-            upload.call(that, data, config || {}, rHandlers);
+            that.xhr = upload.call(that, data, config || {}, rHandlers);
         });
 
         return this;
