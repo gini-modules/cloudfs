@@ -42,8 +42,8 @@ class LocalFS extends \Gini\CloudFS\Cloud
         }
 
         $ext = pathinfo($name, PATHINFO_EXTENSION);
-        $filename = md5($tmp.time());
-        $new = $this->getLocale() . '/' . $filename . ($ext ? '.' . $ext : '');
+        $filename = md5($tmp.time()) . ($ext ? '.' . $ext : '');
+        $new = $this->getLocale() . '/' . $filename;
         if (!move_uploaded_file($tmp, $new)) {
             return 'Upload Failed!';
         }
@@ -64,9 +64,12 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $res = $this->_uploadMe($file);
         if (!is_array($res)) return;
         if (!$callback || !class_exists($callback)) {
-            return $res['filename'];
+            return ['key'=>$res['filename']];
         }
-        $result = call_user_func($callback, $res);
+        $result = (array)call_user_func($callback, $res);
+        if (!isset($result['key'])) {
+            $result['key'] = $res['filename'];
+        }
         return $result;
     }
 
@@ -75,8 +78,8 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $config = $this->_config;
         $callbacks = $config['callbacks'];
         $callback = $callbacks['get_file_info'];
-        if (!$callback || !class_exists($callback)) return $filename;
-        $result = call_user_func($callback, $file);
+        if (!$callback || !class_exists($callback)) return [$filename];
+        $result = (array)call_user_func($callback, $file);
         return $result;
     }
 
