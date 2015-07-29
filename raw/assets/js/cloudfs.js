@@ -46,7 +46,7 @@ define('cloudfs', ['jquery'], function($) {
                     percent: Math.round(evt.loaded * 100 / evt.total)
                 };
             }
-            if (handler.progress) handler.progress(info);
+            if (handler.progress) handler.progress(info, xhr);
         }, false);
 
         xhr.addEventListener('load', function(evt) {
@@ -56,26 +56,24 @@ define('cloudfs', ['jquery'], function($) {
                 $.post('/ajax/cloudfs/parse-data', {
                     cloud: that.cloud, data: data
                 }, function(data) {
-                    if (handler.success) handler.success(data);
-                    if (handler.always) handler.always(evt);
+                    if (handler.success) handler.success(data, xhr);
+                    if (handler.always) handler.always(evt, xhr);
                 });
             }
         }, false);
 
         xhr.addEventListener('error', function(evt) {
-            if (handler.error) handler.error(evt);
-            if (handler.always) handler.always(evt);
+            if (handler.error) handler.error(evt, xhr);
+            if (handler.always) handler.always(evt, xhr);
         }, false);
 
         xhr.addEventListener('abort', function(evt) {
-            if (handler.abort) handler.abort();
-            if (handler.always) handler.always(evt);
+            if (handler.abort) handler.abort(xhr);
+            if (handler.always) handler.always(evt, xhr);
         }, false);
 
         xhr.open('POST', config.url);
         xhr.send(form);
-        
-        return xhr;
     };
 
     var CloudFS = function(cloud) {
@@ -92,7 +90,7 @@ define('cloudfs', ['jquery'], function($) {
             var mHandlers = handler || {};
             var tHandlers = that.handlers || {};
             var rHandlers = $.extend(tHandlers, mHandlers);
-            that.xhr = upload.call(that, data, config || {}, rHandlers);
+            upload.call(that, data, config || {}, rHandlers);
         });
 
         return this;
