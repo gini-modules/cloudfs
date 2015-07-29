@@ -63,7 +63,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $callback = $callbacks['upload'];
         $res = $this->_uploadMe($file);
         if (!is_array($res)) return;
-        if (!$callback || !class_exists($callback)) {
+        if (!$callback || !is_callable($callback)) {
             return ['key'=>$res['filename']];
         }
         $result = call_user_func($callback, $res);
@@ -75,16 +75,6 @@ class LocalFS extends \Gini\CloudFS\Cloud
         if (!isset($result['key'])) {
             $result['key'] = $res['filename'];
         }
-        return $result;
-    }
-
-    public function getImageURL($filename) 
-    {
-        $config = $this->_config;
-        $callbacks = $config['callbacks'];
-        $callback = $callbacks['get_file_info'];
-        if (!$callback || !class_exists($callback)) return [$filename];
-        $result = call_user_func($callback, $file);
         return $result;
     }
 
@@ -102,10 +92,23 @@ class LocalFS extends \Gini\CloudFS\Cloud
         return $data;
     }
 
+    public function getImageURL($filename) 
+    {
+        $config = $this->_config;
+        $callbacks = $config['callbacks'];
+        $callback = $callbacks['get_file_info'];
+        if (!$callback || !is_callable($callback)) return $filename;
+        $result = call_user_func($callback, $filename);
+        return $result;
+    }
+
     public function parseData(array $data=[]) 
     {
         if (!isset($data['key'])) return;
         $image = $this->getImageURL($data['key']);
+        if (!is_array($image)) {
+            $image = [$image];
+        }
         return $image;
     }
 
