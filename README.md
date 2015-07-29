@@ -32,6 +32,18 @@ client:
    # 在没有指定选择的cloud时，默认使用的配置，在client角色的站点配置
    default: qiniu_client
    # 各类cloud的配置信息，如qiniu, abc
+   LOCALFS:
+       driver: LocalFS
+       callbacks:
+       options:
+           # 上传文件请求提交到的地址，默认为ajax/cloudfs/localfs/upload/[LOCALFS]
+           url: ...
+           # 文件上传的路径，默认为data/cloudfs/localfs
+           root: ...
+           # 支持上传的文件类型，默认为所有类型
+           types:
+              - text/plain
+              - ...
    qiniu_client:
        driver: Qiniu
        rpc:
