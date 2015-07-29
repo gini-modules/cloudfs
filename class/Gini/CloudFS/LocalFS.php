@@ -66,7 +66,12 @@ class LocalFS extends \Gini\CloudFS\Cloud
         if (!$callback || !class_exists($callback)) {
             return ['key'=>$res['filename']];
         }
-        $result = (array)call_user_func($callback, $res);
+        $result = call_user_func($callback, $res);
+        if (!is_array($result)) {
+            $result = [
+                'data'=> $result
+            ];
+        }
         if (!isset($result['key'])) {
             $result['key'] = $res['filename'];
         }
@@ -79,7 +84,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $callbacks = $config['callbacks'];
         $callback = $callbacks['get_file_info'];
         if (!$callback || !class_exists($callback)) return [$filename];
-        $result = (array)call_user_func($callback, $file);
+        $result = call_user_func($callback, $file);
         return $result;
     }
 
