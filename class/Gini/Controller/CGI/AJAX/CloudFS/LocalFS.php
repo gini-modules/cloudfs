@@ -26,7 +26,7 @@ class LocalFS extends \Gini\Controller\CGI
         **/
 
         $cfs = \Gini\IoC::construct('\Gini\CloudFS\Client', $client);
-        $result = $cfs->upload($file);
+        $result = (array)$cfs->upload($file);
         return $this->showJSON($result);
     }
 }
