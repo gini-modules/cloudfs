@@ -104,7 +104,6 @@ class LocalFS extends \Gini\CloudFS\Cloud
 
     public function parseData(array $data=[]) 
     {
-        if (!isset($data['key'])) return;
         $image = $this->getImageURL($data['key']);
         if (!is_array($image)) {
             $image = [$image];
