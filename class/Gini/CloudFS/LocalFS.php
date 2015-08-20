@@ -69,7 +69,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
         else {
             $result = call_user_func($callback, $res);
         }
-        if (!is_array($reuslt)) {
+        if (!is_array($result)) {
             $data['error'] = $result;
         }
         else {
