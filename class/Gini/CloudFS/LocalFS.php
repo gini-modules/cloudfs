@@ -76,7 +76,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
             move_uploaded_file($res['tmp'], $res['file']);
             $data = $result;
         }
-        if (!isset($data['key'])) {
+        if (!isset($data['key']) && is_array($res) && isset($res['filename'])) {
             $data['key'] = $res['filename'];
         }
         return $data;
