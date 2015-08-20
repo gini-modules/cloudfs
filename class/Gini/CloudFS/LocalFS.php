@@ -44,15 +44,14 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $ext = pathinfo($name, PATHINFO_EXTENSION);
         $filename = md5($tmp.time()) . ($ext ? '.' . $ext : '');
         $new = $this->getLocale() . '/' . $filename;
-        if (!move_uploaded_file($tmp, $new)) {
-            return 'Upload Failed!';
-        }
+
         return [
             'name'=> $name,
             'type'=> $type,
             'size'=> $size,
             'filename'=> $filename,
-            'file'=> $new
+            'file'=> $new,
+            'tmp'=> $tmp
         ];
     }
 
@@ -67,13 +66,15 @@ class LocalFS extends \Gini\CloudFS\Cloud
             return ['key'=>$res['filename']];
         }
         $result = call_user_func($callback, $res);
-        if (!is_array($result)) {
-            $result = [
-                'data'=> $result
-            ];
-        }
-        if (!isset($result['key'])) {
-            $result['key'] = $res['filename'];
+        if (false!==$result && move_uploaded_file($res['tmp'], $res['file'])) {
+            if (!is_array($result)) {
+                $result = [
+                    'data'=> $result
+                ];
+            }
+            if (!isset($result['key'])) {
+                $result['key'] = $res['filename'];
+            }
         }
         return $result;
     }
