@@ -20,7 +20,7 @@ class CloudFS
             $callbacks = (array) $conf['callbacks'];
             foreach ($callbacks as $callback) {
                 if (!is_callable($callback)) {
-                    $error[] = "{$callbacks} 不存在";
+                    $error[] = "{$callback} 不存在";
                 }
             }
             $cfs = \Gini\IoC::construct('\Gini\CloudFS\Client', $key);
