@@ -37,7 +37,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $types = $options['types'];
         if (!empty($types)) {
             if (!in_array($type, $types)) {
-                return "Type {$type} is not allowed!";
+                return T("Filetype is not allowed!");
             }
         }
 
@@ -61,22 +61,25 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $callbacks = $config['callbacks'];
         $callback = $callbacks['upload'];
         $res = $this->_uploadMe($file);
-        if (!is_array($res)) return;
+
+        $data = [];
         if (!$callback || !is_callable($callback)) {
-            return ['key'=>$res['filename']];
+            $result = $res;
         }
-        $result = call_user_func($callback, $res);
-        if (false!==$result && move_uploaded_file($res['tmp'], $res['file'])) {
-            if (!is_array($result)) {
-                $result = [
-                    'data'=> $result
-                ];
-            }
-            if (!isset($result['key'])) {
-                $result['key'] = $res['filename'];
-            }
+        else {
+            $result = call_user_func($callback, $res);
         }
-        return $result;
+        if (!is_array($reuslt)) {
+            $data['error'] = $result;
+        }
+        else {
+            move_uploaded_file($res['tmp'], $res['file']);
+            $data = $result;
+        }
+        if (!isset($data['key'])) {
+            $data['key'] = $res['filename'];
+        }
+        return $data;
     }
 
     public function getUploadConfig()
@@ -105,11 +108,15 @@ class LocalFS extends \Gini\CloudFS\Cloud
 
     public function parseData(array $data=[]) 
     {
-        $image = $this->getImageURL($data['key']);
-        if (!is_array($image)) {
-            $image = [$image];
+        if ($data['error']) {
+            return [
+                'error'=> $data['error']
+            ];
         }
-        return $image;
+        if ($data['key']) {
+            return $this->getImageURL($data['key']);
+        }
+        return [];
     }
 
 }
