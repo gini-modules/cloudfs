@@ -40,10 +40,10 @@ client:
            url: ...
            # 文件上传的路径，默认为data/cloudfs/localfs
            root: ...
-           # 支持上传的文件类型，默认为所有类型
+           # 支持上传的文件类型，默认为所有类型. 后缀名
            types:
-              - text/plain
-              - ...
+              - xlsx
+              - txt
    qiniu_client:
        driver: Qiniu
        rpc:

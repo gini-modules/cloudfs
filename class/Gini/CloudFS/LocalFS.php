@@ -25,7 +25,12 @@ class LocalFS extends \Gini\CloudFS\Cloud
     private function _uploadMe($file)
     {
         $name = $file['name'];
-        $type = $file['type'];
+        //$type = $file['type'];
+        $dPos = stripos('.', $name);
+        $type = '';
+        if (false!==$dPos) {
+            $type = substr($name, $dPos+1);
+        }
         $tmp = $file['tmp_name'];
         $size = $file['size'];
         $error = $file['error'];
