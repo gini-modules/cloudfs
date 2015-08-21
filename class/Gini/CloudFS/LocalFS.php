@@ -37,7 +37,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $types = $options['types'];
         if (!empty($types)) {
             if (!in_array($type, $types)) {
-                return T("Filetype is not allowed!");
+                throw new \Gini\CloudFS\Exception('FileType Error!', 1);
             }
         }
 
@@ -60,14 +60,19 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $config = $this->_config;
         $callbacks = $config['callbacks'];
         $callback = $callbacks['upload'];
-        $res = $this->_uploadMe($file);
+        try {
+            $res = $this->_uploadMe($file);
+        }
+        catch (\Gini\CloudFS\Exception $e) {
+            $error = $e;
+        }
 
         $data = [];
         if (!$callback || !is_callable($callback)) {
             $result = $res;
         }
         else {
-            $result = call_user_func($callback, $res);
+            $result = call_user_func($callback, $res, $error);
         }
         if (!is_array($result)) {
             $data['error'] = $result;
