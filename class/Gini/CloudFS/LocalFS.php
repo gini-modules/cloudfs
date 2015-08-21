@@ -26,7 +26,7 @@ class LocalFS extends \Gini\CloudFS\Cloud
     {
         $name = $file['name'];
         //$type = $file['type'];
-        $dPos = stripos('.', $name);
+        $dPos = strrpos($name, '.');
         $type = '';
         if (false!==$dPos) {
             $type = substr($name, $dPos+1);
