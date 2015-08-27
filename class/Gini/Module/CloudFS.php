@@ -4,7 +4,7 @@ namespace Gini\Module;
 
 class CloudFS
 {
-    public static function setup() 
+    public static function setup()
     {
     }
 
@@ -13,8 +13,8 @@ class CloudFS
         $error = [];
 
         $confs = (array) \Gini\Config::get('cloudfs.client');
-        foreach ($confs as $key=>$conf) {
-            if (!is_array($conf) || !isset($conf['driver']) || strtolower($conf['driver'])!='localfs') {
+        foreach ($confs as $key => $conf) {
+            if (!is_array($conf) || !isset($conf['driver']) || strtolower($conf['driver']) != 'localfs') {
                 continue;
             }
             $callbacks = (array) $conf['callbacks'];
@@ -30,6 +30,8 @@ class CloudFS
             }
         }
 
-        if (!empty($error)) return $error;
+        if (!empty($error)) {
+            return $error;
+        }
     }
 }

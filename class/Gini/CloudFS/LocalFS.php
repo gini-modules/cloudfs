@@ -17,8 +17,9 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $config = $this->_config;
         $options = $config['options'];
         $root = $options['root'];
-        $path = APP_PATH . '/';
-        $locale = $root ? (strpos($root, '/')===0 ? $root : $path . $root) : $path . 'data/cloudfs/localfs';
+        $path = APP_PATH.'/';
+        $locale = $root ? (strpos($root, '/') === 0 ? $root : $path.$root) : $path.'data/cloudfs/localfs';
+
         return $locale;
     }
 
@@ -28,14 +29,16 @@ class LocalFS extends \Gini\CloudFS\Cloud
         //$type = $file['type'];
         $dPos = strrpos($name, '.');
         $type = '';
-        if (false!==$dPos) {
-            $type = substr($name, $dPos+1);
+        if (false !== $dPos) {
+            $type = substr($name, $dPos + 1);
         }
         $tmp = $file['tmp_name'];
         $size = $file['size'];
         $error = $file['error'];
 
-        if ($error) return $error;
+        if ($error) {
+            return $error;
+        }
 
         $config = $this->_config;
         $options = $config['options'];
@@ -47,16 +50,16 @@ class LocalFS extends \Gini\CloudFS\Cloud
         }
 
         $ext = pathinfo($name, PATHINFO_EXTENSION);
-        $filename = md5($tmp.time()) . ($ext ? '.' . $ext : '');
-        $new = $this->getLocale() . '/' . $filename;
+        $filename = md5($tmp.time()).($ext ? '.'.$ext : '');
+        $new = $this->getLocale().'/'.$filename;
 
         return [
-            'name'=> $name,
-            'type'=> $type,
-            'size'=> $size,
-            'filename'=> $filename,
-            'file'=> $new,
-            'tmp'=> $tmp
+            'name' => $name,
+            'type' => $type,
+            'size' => $size,
+            'filename' => $filename,
+            'file' => $new,
+            'tmp' => $tmp,
         ];
     }
 
@@ -67,66 +70,67 @@ class LocalFS extends \Gini\CloudFS\Cloud
         $callback = $callbacks['upload'];
         try {
             $res = $this->_uploadMe($file);
-        }
-        catch (\Gini\CloudFS\Exception $e) {
+        } catch (\Gini\CloudFS\Exception $e) {
             $error = $e;
         }
 
         $data = [];
         if (!$callback || !is_callable($callback)) {
             $result = $res;
-        }
-        else {
+        } else {
             $result = call_user_func($callback, $res, $error);
         }
         if (!is_array($result)) {
             $data['error'] = $result;
-        }
-        else {
+        } else {
             move_uploaded_file($res['tmp'], $res['file']);
             $data = $result;
         }
         if (!isset($data['key']) && is_array($res) && isset($res['filename'])) {
             $data['key'] = $res['filename'];
         }
+
         return $data;
     }
 
-    public function getUploadConfig()
+    public function getUploadConfig($file = null)
     {
         $config = $this->_config;
         $options = $config['options'];
         $data = [];
         if ($options['url']) {
             $data['url'] = $options['url'];
+        } else {
+            $data['url'] = '/ajax/cloudfs/localfs/upload/'.$this->_client;
         }
-        else {
-            $data['url'] = '/ajax/cloudfs/localfs/upload/' . $this->_client;
-        }
+
         return $data;
     }
 
-    public function getImageURL($filename) 
+    public function getImageURL($filename)
     {
         $config = $this->_config;
         $callbacks = $config['callbacks'];
         $callback = $callbacks['get_file_info'];
-        if (!$callback || !is_callable($callback)) return $filename;
+        if (!$callback || !is_callable($callback)) {
+            return $filename;
+        }
         $result = call_user_func($callback, $filename);
+
         return $result;
     }
 
-    public function parseData(array $data=[]) 
+    public function parseData(array $data = [])
     {
         if ($data['error']) {
             return [
-                'error'=> $data['error']
+                'error' => $data['error'],
             ];
         }
         if ($data['key']) {
             return $this->getImageURL($data['key']);
         }
+
         return [];
     }
-
 }

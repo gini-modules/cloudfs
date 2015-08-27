@@ -1,21 +1,23 @@
 <?php
-/**
-* @file Cloud.php
-* @brief 抽象类，定义了各个cloud至少应该实现的方法
-* @author PiHiZi
-* @version 0.1.0
-* @date 2014-07-11
- */
 
+/**
+ * @file Cloud.php
+ * @brief 抽象类，定义了各个cloud至少应该实现的方法
+ *
+ * @author PiHiZi
+ *
+ * @version 0.1.0
+ * @date 2014-07-11
+ */
 namespace Gini\CloudFS;
 
 abstract class Cloud
 {
     /**
-        * @brief 获取rpc实例
+     * @brief 获取rpc实例
      */
     private static $_RPC = [];
-    public function getRPC($type, $config=null)
+    public function getRPC($type, $config = null)
     {
         if (!self::$_RPC[$type] && isset($config) && is_array($config)) {
             try {
@@ -30,11 +32,11 @@ abstract class Cloud
                 if (!$token) {
                     throw new \Gini\RPC\Exception('Access Denied!', 401);
                 }
-
             } catch (\Gini\RPC\Exception $e) {
-                \Gini\Logger::of('cloudfs')->error('Cloud::getRPC {message}[{code}]', [ 'code' => $e->getCode(), 'message' => $e->getMessage()]);
+                \Gini\Logger::of('cloudfs')->error('Cloud::getRPC {message}[{code}]', ['code' => $e->getCode(), 'message' => $e->getMessage()]);
             }
         }
+
         return self::$_RPC[$type];
     }
 
@@ -42,6 +44,5 @@ abstract class Cloud
 
     abstract public function getImageURL($filename);
 
-    abstract public function getUploadConfig();
-
+    abstract public function getUploadConfig($file);
 }

@@ -1,19 +1,24 @@
 <?php
-/**
-* @file CloudFS.php
-* @brief 客户端有效性验证
-* @author PiHiZi
-* @version 0.1.0
-* @date 2014-07-11
- */
 
+/**
+ * @file CloudFS.php
+ * @brief 客户端有效性验证
+ *
+ * @author PiHiZi
+ *
+ * @version 0.1.0
+ * @date 2014-07-11
+ */
 namespace Gini\Controller\API;
 
 class CloudFS extends \Gini\Controller\API
 {
     public function actionAuthorize($server, $clientId, $clientSecret)
     {
-        if (!\Gini\CloudFS\Client::authorize($server, $clientId, $clientSecret)) return false;
+        if (!\Gini\CloudFS\Client::authorize($server, $clientId, $clientSecret)) {
+            return false;
+        }
+
         return session_id();
     }
 }

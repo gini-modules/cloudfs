@@ -1,22 +1,15 @@
 /*
-var cfs = new CloudFS('name');
 
-// e.g 1
-cfs.upload(data, {
-    'progress': function() {}
-    ,'success': function() {}
-    ,'error': function() {}
-    ,'always': function() {}
+require(['cloudfs'], function(CloudFS) {
+    CloudFS.dropbox({
+        cloud: 'xxx',
+        container: element,
+        progress: function() {},
+        success: function() {},
+        error: function() {},
+        always: function() {}
+    });
 });
-
-// e.g 2
-cfs
-    .upload(data)
-    .progress(function() {})
-    .success(function() {})
-    .error(function() {})
-    .always(function() {})
-;
 */
 define('cloudfs', ['jquery'], function($) {
 
@@ -84,8 +77,13 @@ define('cloudfs', ['jquery'], function($) {
 
     CloudFS.prototype.upload = function(data, handler) {
         var that = this;
-        $.get(this.configURL, {
-            cloud: this.cloud
+        $.get(that.configURL, {
+            cloud: that.cloud,
+            file: {
+                name: data.file.name,
+                size: data.file.size,
+                type: data.file.type
+            }
         }, function(config) {
             var mHandlers = handler || {};
             var tHandlers = that.handlers || {};
@@ -116,10 +114,58 @@ define('cloudfs', ['jquery'], function($) {
         this.handlers.always= method;
     };
 
+    function _supportDragAndDrop() {
+        var div = document.createElement('div');
+        return ('draggable' in div) || ('ondragstart' in div && 'ondrop' in div);
+    }
+
     return {
         upload: function(cloud, file, handlers) {
             var cfs = new CloudFS(cloud);
             return cfs.upload(file, handlers);
+        },
+        dropbox: function(opt) {
+            if (!_supportDragAndDrop()) return;
+
+            opt = opt || {};
+            opt.cloud = opt.cloud || '';
+
+            var that = opt.container;
+            var $el = $(opt.container);
+
+            $el.on('dragover', function(evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                opt.dragover && opt.dragover.call(that);
+            }).on('dragenter', function(evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                opt.dragenter && opt.dragenter.call(that);
+            }).on('dragleave', function(evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                opt.dragleave && opt.dragleave.call(that);
+            }).on('drop', function(evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                opt.leave && opt.leave.call(that);
+
+                var files = evt.originalEvent.dataTransfer.files;
+                if (!files.length) return;
+
+                var cfs = new CloudFS(opt.cloud);
+                opt.start && opt.start.call(that);
+                for (var i=0; i< files.length; i++) {
+                    var file = files[i];
+                    cfs.upload({ file: file }, {
+                        progress: opt.progress,
+                        abort: opt.abort,
+                        error: opt.error,
+                        success: opt.success,
+                        always: opt.always
+                    });
+                }
+            });
         }
     };
 
