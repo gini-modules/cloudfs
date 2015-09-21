@@ -8,17 +8,19 @@ class LocalFS extends \Gini\Controller\CGI
     {
         return \Gini\IoC::construct('\Gini\CGI\Response\Nothing');
     }
+
     private function showJSON($data)
     {
         return \Gini\IoC::construct('\Gini\CGI\Response\JSON', $data);
     }
 
-    public function actionUpload($client = null)
+    public function actionUpload($server = null)
     {
         $files = $this->form('files');
         if (empty($files)) {
             return $this->showNothing();
         }
+        
         $file = current($files);
         if (empty($file)) {
             return $this->showNothing();
@@ -29,7 +31,7 @@ class LocalFS extends \Gini\Controller\CGI
         if (!$form['token']) return $this->showNothing();
         **/
 
-        $cfs = \Gini\IoC::construct('\Gini\CloudFS\Client', $client);
+        $cfs = \Gini\IoC::construct('\Gini\CloudFS\Server', $server);
         $result = (array) $cfs->upload($file);
 
         return $this->showJSON($result);

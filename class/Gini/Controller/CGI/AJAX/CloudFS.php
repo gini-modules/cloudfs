@@ -13,29 +13,19 @@ namespace Gini\Controller\CGI\AJAX;
 
 class CloudFS extends \Gini\Controller\CGI
 {
-    final public function showJSON($data)
+    public function actionConfig()
     {
+        $form = $this->form();
+        $fs = \Gini\IoC::construct('\Gini\CloudFS\Server', $form['server']);
+        return \Gini\IoC::construct('\Gini\CGI\Response\JSON', $fs->config($form['file']));
+    }
+
+    public function actionUploaded()
+    {
+        $form = $this->form();
+        $fs = \Gini\IoC::construct('\Gini\CloudFS\Server', $form['server']);
+        $data = (array) $fs->callback((array) $form['data']);
         return \Gini\IoC::construct('\Gini\CGI\Response\JSON', $data);
-    }
-
-    public function actionGetConfig()
-    {
-        $form = $this->form();
-        $cloud = $form['cloud'];
-        $cfs = \Gini\IoC::construct('\Gini\CloudFS\Client', $cloud);
-        $config = $cfs->getUploadConfig($form['file']);
-
-        return $this->showJSON($config);
-    }
-
-    public function actionParseData()
-    {
-        $form = $this->form();
-        $cloud = $form['cloud'];
-        $cloud = \Gini\IoC::construct('\Gini\CloudFS\Client', $cloud);
-        $data = (array) $cloud->parseData((array) $form['data']);
-
-        return $this->showJSON($data);
     }
 
 }

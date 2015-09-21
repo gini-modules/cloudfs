@@ -2,7 +2,7 @@
 
 require(['cloudfs'], function(CloudFS) {
     CloudFS.dropbox({
-        cloud: 'xxx',
+        server: 'xxx',
         container: element,
         progress: function() {},
         success: function() {},
@@ -46,8 +46,8 @@ define('cloudfs', ['jquery'], function($) {
             var status = evt.target.status;
             if (status==200) {
                 var data = JSON.parse(xhr.responseText);
-                $.post('/ajax/cloudfs/parse-data', {
-                    cloud: that.cloud, data: data
+                $.post('/ajax/cloudfs/uploaded', {
+                    server: that.server, data: data
                 }, function(data) {
                     if (handler.success) handler.success(data, xhr);
                     if (handler.always) handler.always(evt, xhr);
@@ -69,16 +69,16 @@ define('cloudfs', ['jquery'], function($) {
         xhr.send(form);
     };
 
-    var CloudFS = function(cloud) {
-        this.configURL = '/ajax/cloudfs/get-config';
-        this.cloud = cloud || '';
+    var CloudFS = function(server) {
+        this.configURL = '/ajax/cloudfs/config';
+        this.server = server || '';
         this.handlers = {};
     };
 
     CloudFS.prototype.upload = function(data, handler) {
         var that = this;
         $.get(that.configURL, {
-            cloud: that.cloud,
+            server: that.server,
             file: {
                 name: data.file.name,
                 size: data.file.size,
@@ -120,15 +120,15 @@ define('cloudfs', ['jquery'], function($) {
     }
 
     return {
-        upload: function(cloud, file, handlers) {
-            var cfs = new CloudFS(cloud);
+        upload: function(server, file, handlers) {
+            var cfs = new CloudFS(server);
             return cfs.upload(file, handlers);
         },
         dropbox: function(opt) {
             if (!_supportDragAndDrop()) return;
 
             opt = opt || {};
-            opt.cloud = opt.cloud || '';
+            opt.server = opt.server || '';
 
             var that = opt.container;
             var $el = $(opt.container);
@@ -153,7 +153,7 @@ define('cloudfs', ['jquery'], function($) {
                 var files = evt.originalEvent.dataTransfer.files;
                 if (!files.length) return;
 
-                var cfs = new CloudFS(opt.cloud);
+                var cfs = new CloudFS(opt.server);
                 opt.start && opt.start.call(that);
                 for (var i=0; i< files.length; i++) {
                     var file = files[i];

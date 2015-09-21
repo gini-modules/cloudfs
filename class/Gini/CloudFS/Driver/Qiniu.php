@@ -11,35 +11,42 @@
  */
 namespace Gini\CloudFS\Driver;
 
-class Qiniu extends \Gini\CloudFS\Driver
+class Qiniu implements \Gini\CloudFS\Driver
 {
     private $_config = [];
-    private $_client;
-    public function __construct($client, $config)
+
+    public function __construct($config)
     {
-        $this->_client = $client;
         $this->_config = $config;
-        $this->getRPC('cloudfs', $this->_config['rpc'])->qiniu->init($this->_config['rpc']['server']);
     }
 
     private function _getFilename($file)
     {
         $host = $_SERVER['HTTP_HOST'] ?: $_SERVER['SERVER_NAME'];
-        $filename = $this->getRPC('cloudfs')->qiniu->getURI($host, $file);
-
-        return $filename;
+        $options = $this->_config['options'];
+        $filename = \Gini\Util::randPassword().microtime();
+        return ($options['prefix'] ?: '').sha1($host.$filename).'.'.pathinfo($file, PATHINFO_EXTENSION);
     }
 
     private function _getToken($filename, $cbkURL = null, $cbkBody = null)
     {
         $options = $this->_config['options'];
-        $token = $this->getRPC('cloudfs')->qiniu->getToken([
-            'file' => $filename,
-            'callback_url' => $cbkURL ?: $options['callback_url'],
-            'callback_body' => $cbkBody ?: $options['callback_body'],
-        ]);
+        $bucket = $options['bucket'];
 
-        return $token;
+        $accessKey = $options['accessKey'];
+        $secretKey = $options['secretKey'];
+
+        $auth = new \Qiniu\Auth($accessKey, $secretKey);
+
+        $opts = [];
+        if (isset($params['callback_body'])) {
+            $opts['callbackBody'] = $cbkURL ?: $options['callback_url'];
+        }
+        if (isset($params['callback_url'])) {
+            $opts['callbackUrl'] = $cbkBody ?: $options['callback_body'];
+        }
+
+        return $auth->uploadToken($bucket, null, 3600, $opts);
     }
 
     private function _filterResult($data, $error)
@@ -65,7 +72,59 @@ class Qiniu extends \Gini\CloudFS\Driver
         return $result;
     }
 
-    public function upload($file)
+    public function isFromQiniuServer()
+    {
+        $authstr = $_SERVER['HTTP_AUTHORIZATION'];
+        if (strpos($authstr, 'QBox ') != 0) {
+            return false;
+        }
+        
+        $auth = explode(':', substr($authstr, 5));
+        if (sizeof($auth) != 2) {
+            return false;
+        }
+        
+        $data = $_SERVER['REQUEST_URI']."\n".file_get_contents('php://input');
+        list($iAccessKey, $encodedData) = $auth;
+        
+        $options = $this->_config['options'];
+        $bucket = $options['bucket'];
+
+        $accessKey = $options['accessKey'];
+        $secretKey = $options['secretKey'];
+        
+        if ($iAccessKey !== $accessKey) {
+            return false;
+        }
+
+        $myEData = str_replace(['+', '/'], ['-', '_'], base64_encode(hash_hmac('sha1', $data, $secretKey, true)));
+        if ($myEData !== $encodedData) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function runServerCallback(array $data)
+    {
+        $error = ($data['key'] && $data['hash']) ? false : ['code' => 0, 'error' => 'Response error from qiniu server.'];
+        $result = $this->_filterResult($data, $error);
+
+        return $result;
+    }
+
+    private function _getUrl($file)
+    {
+        $options = $this->_config['options'];
+        $bucket = $options['bucket'];
+
+        $domain = $options['domain'] ?: $bucket.'.qiniudn.com';
+        $url = "http://{$domain}/{$file}";
+
+        return $url;
+    }
+
+    public function upload(array $file)
     {
         $result = false;
 
@@ -85,39 +144,7 @@ class Qiniu extends \Gini\CloudFS\Driver
         return $result;
     }
 
-    public function isFromQiniuServer()
-    {
-        $authstr = $_SERVER['HTTP_AUTHORIZATION'];
-        if (strpos($authstr, 'QBox ') != 0) {
-            return false;
-        }
-        $auth = explode(':', substr($authstr, 5));
-        if (sizeof($auth) != 2) {
-            return false;
-        }
-        $data = $_SERVER['REQUEST_URI']."\n".file_get_contents('php://input');
-
-        $result = $this->getRPC('cloudfs')->qiniu->isFromQiniuServer($data, $auth[0], $auth[1]);
-
-        return !!$result;
-    }
-
-    public function runServerCallback(array $data)
-    {
-        $error = ($data['key'] && $data['hash']) ? false : ['code' => 0, 'error' => 'Response error from qiniu server.'];
-        $result = $this->_filterResult($data, $error);
-
-        return $result;
-    }
-
-    public function getImageURL($filename)
-    {
-        $url = $this->getRPC('cloudfs')->qiniu->getImageURL($filename);
-
-        return $url;
-    }
-
-    public function getUploadConfig($file = null)
+    public function config(array $file)
     {
         $config = $this->_config;
         $options = $config['options'];
@@ -133,30 +160,28 @@ class Qiniu extends \Gini\CloudFS\Driver
             $params['x:callbackBody'] = $options['callback_body'];
         }
 
-        if ($options['mode'] === 'direct') {
-            $data['url'] = 'http://up.qiniu.com';
+        $data['url'] = 'http://up.qiniu.com';
 
-            $filename = $this->_getFilename($file['name']);
-            $token = $this->_getToken($filename);
+        $filename = $this->_getFilename($file['name']);
+        $token = $this->_getToken($filename);
 
-            $params['key'] = $filename;
-            $params['token'] = $token;
-        } else {
-            $data['url'] = '/ajax/cloudfs/qiniu/upload/'.$this->_client;
-        }
+        $params['key'] = $filename;
+        $params['token'] = $token;
 
         $data['params'] = $params;
 
         return $data;
     }
 
-    public function parseData(array $data = [])
+    public function callback(array $data)
     {
         if (!isset($data['key'])) {
             return;
         }
-        $image = $this->getImageURL($data['key']);
-
-        return $image;
+        
+        return [
+            'url' => $this->_getUrl($data['key']),
+        ];
     }
+
 }
