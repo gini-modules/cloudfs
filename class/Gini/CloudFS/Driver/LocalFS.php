@@ -15,8 +15,9 @@ class LocalFS implements \Gini\CloudFS\Driver
     {
         $config = $this->_config;
         $options = $config['options'];
-        $root = $options['root'] ?: APP_PATH.'/'.DATA_DIR.'/cloudfs/localfs';    
-        return $root . '/' . $filename;
+        $root = $options['root'] ?: APP_PATH.'/'.DATA_DIR.'/cloudfs/localfs';
+
+        return $root.'/'.$filename;
     }
 
     private function _uploadMe($file)
@@ -85,14 +86,14 @@ class LocalFS implements \Gini\CloudFS\Driver
     }
 
     public function config($file = null)
-    {    
+    {
         $options = $this->_config['options'];
 
         $data = [
             'url' => $options['url'] ?: '/ajax/cloudfs/localfs/upload',
             'params' => [
                 'server' => $this->_config['@name'],
-            ]
+            ],
         ];
 
         return $data;
@@ -107,6 +108,7 @@ class LocalFS implements \Gini\CloudFS\Driver
             return $filename;
         }
         $result = call_user_func($callback, $filename);
+
         return $result;
     }
 

@@ -9,6 +9,7 @@
  * @version 0.1.0
  * @date 2014-07-11
  */
+
 namespace Gini\CloudFS
 {
 
@@ -16,7 +17,7 @@ namespace Gini\CloudFS
     {
         // 允许驱动暴露出来让外部调用专门的函数
         public $driver;
-        
+
         /**
          * @brief 云服务器代理初始化
          *
@@ -28,26 +29,42 @@ namespace Gini\CloudFS
         {
             $confs = \Gini\Config::get('cloudfs.server');
             $name = $name ?: $confs['default'];
-            
+
             assert(isset($confs[$name]));
             $conf = $confs[$name];
-            
+
             assert(isset($conf['driver']));
             $driver = $conf['driver'];
             $conf['@name'] = $name;
-            
+
             $class = "\\Gini\\CloudFS\\Driver\\{$driver}";
             assert(class_exists($class));
             $this->driver = \Gini\IoC::construct($class, $conf);
         }
 
-        public function config(array $data) {
+        public function config(array $data)
+        {
             return $this->driver->config($data);
         }
 
-        public function callback(array $data) {
+        public function callback(array $data)
+        {
             return $this->driver->callback($data);
         }
 
+        public function safeUrl($url)
+        {
+            return $this->driver->safeUrl($url);
+        }
+
+        public function delete($url)
+        {
+            return $this->driver->delete($url);
+        }
+
+        public static function of($name)
+        {
+            return \Gini\IoC::construct('\Gini\CloudFS\Server', $name);
+        }
     }
 }

@@ -20,7 +20,7 @@ class LocalFS extends \Gini\Controller\CGI
         if (empty($files)) {
             return $this->showNothing();
         }
-        
+
         $file = current($files);
         if (empty($file)) {
             return $this->showNothing();

@@ -9,6 +9,7 @@
  * @version 0.1.0
  * @date 2014-07-11
  */
+
 namespace Gini\Controller\CGI\AJAX;
 
 class CloudFS extends \Gini\Controller\CGI
@@ -17,6 +18,7 @@ class CloudFS extends \Gini\Controller\CGI
     {
         $form = $this->form();
         $fs = \Gini\IoC::construct('\Gini\CloudFS\Server', $form['server']);
+
         return \Gini\IoC::construct('\Gini\CGI\Response\JSON', $fs->config($form['file']));
     }
 
@@ -25,7 +27,7 @@ class CloudFS extends \Gini\Controller\CGI
         $form = $this->form();
         $fs = \Gini\IoC::construct('\Gini\CloudFS\Server', $form['server']);
         $data = (array) $fs->callback((array) $form['data']);
+
         return \Gini\IoC::construct('\Gini\CGI\Response\JSON', $data);
     }
-
 }

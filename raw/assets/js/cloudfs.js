@@ -46,7 +46,7 @@ define('cloudfs', ['jquery'], function($) {
             var status = evt.target.status;
             if (status==200) {
                 var data = JSON.parse(xhr.responseText);
-                $.post('/ajax/cloudfs/uploaded', {
+                $.post('ajax/cloudfs/uploaded', {
                     server: that.server, data: data
                 }, function(data) {
                     if (handler.success) handler.success(data, xhr);
@@ -70,7 +70,7 @@ define('cloudfs', ['jquery'], function($) {
     };
 
     var CloudFS = function(server) {
-        this.configURL = '/ajax/cloudfs/config';
+        this.configURL = 'ajax/cloudfs/config';
         this.server = server || '';
         this.handlers = {};
     };

@@ -9,6 +9,7 @@
  * @version 0.1.0
  * @date 2014-07-11
  */
+
 namespace Gini\CloudFS\Driver;
 
 class Qiniu implements \Gini\CloudFS\Driver
@@ -25,6 +26,7 @@ class Qiniu implements \Gini\CloudFS\Driver
         $host = $_SERVER['HTTP_HOST'] ?: $_SERVER['SERVER_NAME'];
         $options = $this->_config['options'];
         $filename = \Gini\Util::randPassword().microtime();
+
         return ($options['prefix'] ?: '').sha1($host.$filename).'.'.pathinfo($file, PATHINFO_EXTENSION);
     }
 
@@ -78,21 +80,21 @@ class Qiniu implements \Gini\CloudFS\Driver
         if (strpos($authstr, 'QBox ') != 0) {
             return false;
         }
-        
+
         $auth = explode(':', substr($authstr, 5));
         if (sizeof($auth) != 2) {
             return false;
         }
-        
+
         $data = $_SERVER['REQUEST_URI']."\n".file_get_contents('php://input');
         list($iAccessKey, $encodedData) = $auth;
-        
+
         $options = $this->_config['options'];
         $bucket = $options['bucket'];
 
         $accessKey = $options['accessKey'];
         $secretKey = $options['secretKey'];
-        
+
         if ($iAccessKey !== $accessKey) {
             return false;
         }
@@ -178,10 +180,42 @@ class Qiniu implements \Gini\CloudFS\Driver
         if (!isset($data['key'])) {
             return;
         }
-        
+
         return [
             'url' => $this->_getUrl($data['key']),
         ];
     }
 
+    public function delete($url)
+    {
+        if (!$url) {
+            return;
+        }
+
+        $options = $this->_config['options'];
+        $bucket = $options['bucket'];
+
+        $accessKey = $options['accessKey'];
+        $secretKey = $options['secretKey'];
+
+        $auth = new \Qiniu\Auth($accessKey, $secretKey);
+
+        $key = ltrim(parse_url($url, PHP_URL_PATH), '/');
+        $bucketManager = new \Qiniu\Storage\BucketManager($auth);
+
+        return $bucketManager->delete($bucket, $key);
+    }
+
+    public function safeUrl($url)
+    {
+        $options = $this->_config['options'];
+        $bucket = $options['bucket'];
+
+        $accessKey = $options['accessKey'];
+        $secretKey = $options['secretKey'];
+
+        $auth = new \Qiniu\Auth($accessKey, $secretKey);
+
+        return $auth->privateDownloadUrl($url);
+    }
 }
