@@ -1,8 +1,8 @@
 <?php
 
-namespace Gini\CloudFS;
+namespace Gini\CloudFS\Driver;
 
-class LocalFS extends \Gini\CloudFS\Cloud
+class LocalFS extends \Gini\CloudFS\Driver
 {
     private $_config = [];
     private $_client;

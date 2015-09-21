@@ -46,7 +46,7 @@ namespace Gini\CloudFS
                 return;
             }
 
-            $className = "\\Gini\\CloudFS\\{$driver}";
+            $className = "\\Gini\\CloudFS\\Driver\\{$driver}";
             $iCloud = \Gini\IoC::construct($className, $this->_client, $configClient);
             if (method_exists($iCloud, $method)) {
                 // action的取值：upload/getImageURL/getThumbURL/getUploadConfig

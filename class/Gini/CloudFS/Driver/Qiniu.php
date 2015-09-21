@@ -9,9 +9,9 @@
  * @version 0.1.0
  * @date 2014-07-11
  */
-namespace Gini\CloudFS;
+namespace Gini\CloudFS\Driver;
 
-class Qiniu extends \Gini\CloudFS\Cloud
+class Qiniu extends \Gini\CloudFS\Driver
 {
     private $_config = [];
     private $_client;

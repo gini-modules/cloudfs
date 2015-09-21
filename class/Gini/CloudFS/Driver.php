@@ -11,7 +11,7 @@
  */
 namespace Gini\CloudFS;
 
-abstract class Cloud
+abstract class Driver
 {
     /**
      * @brief 获取rpc实例
