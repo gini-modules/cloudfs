@@ -27,9 +27,22 @@ gini cache
 ##### 2.1. `raw/config/cloudfs.yml`
 ```bash
 server:
-   default: qiniu_server
+   default: server1
    # 各类cloud的配置信息，如qiniu, abc
    server1:
+       driver: Qiniu
+       # 配置可以访问CloudFS Server的客户端
+       callbacks:
+           success: "\Name\To\Class::method"
+           fail: "\Name\To\Class::method"
+           always: "\Name\To\Class::method"
+       options:
+           #不同的cloud可能或有不同的配置
+           # 比如：qiniu会有bucket，而ftp的方式可能就没有
+           bucket: BUCKETNAME
+           accessKey: CLOUDACCESSKEY
+           secretKey: CLOUDSECRETKEY
+   server2:
        driver: LocalFS
        callbacks:
        options:
@@ -41,26 +54,11 @@ server:
            types:
               - xlsx
               - txt
-   server2:
-       driver: Qiniu
-       # 配置可以访问CloudFS Server的客户端
-       clients:
-           CLIENTID: CLIENTSECRET
-       callbacks:
-           success: "\Name\To\Class::method"
-           fail: "\Name\To\Class::method"
-           always: "\Name\To\Class::method"
-       options:
-           #不同的cloud可能或有不同的配置
-           # 比如：qiniu会有bucket，而ftp的方式可能就没有
-           bucket: BUCKETNAME
-           accessKey: CLOUDACCESSKEY
-           secretKey: CLOUDSECRETKEY
 ```
 #### 3. 前端调用
 ```javascript
-require(['cloudfs'], function(CloudFS) {
- CloudFS.upload('qiniu_client', file, {
+require(['cloudfs', 'jquery'], function(CloudFS, $) {
+ CloudFS.upload('server1', file, {
      progress: function(progress) {
         // progress: {
         //      total: NUMBER,
@@ -82,12 +80,46 @@ require(['cloudfs'], function(CloudFS) {
  });
 
  // or deferred mode
- CloudFS.upload('qiniu_client', file)
+ CloudFS.upload('server1', file)
  .progress(function(){})
  .success(function(){})
  .fail(function(){})
  .abort(function(){})
  .always(function(){});
-
+ 
+ // or dropbox mode
+ var $dropbox = $('#dropbox');
+ CloudFS.dropbox({
+    server: 'server1',
+    container: $dropbox[0],
+    dragenter: function() {
+        $dropbox.addClass('dropbox-hover');
+    },
+    dragleave: function() {
+        $dropbox.removeClass('dropbox-hover');
+    },
+    start: function() {
+        $dropbox.removeClass('dropbox-hover');
+        $dropbox.find('.progress').show().children('.progress-bar').css({width:0});
+    },
+    progress: function(data) {
+        $dropbox.find('.progress .progress-bar').css({
+            width: '' + data.percent + '%'
+        });
+    },
+    success: function(data) {
+        var old_url = $form.find('[name="attachment"]').val();
+        $.post('ajax/path/to/uploaded', {
+            'url': data.url,
+            'old-url': old_url
+        }, function(html){
+            $dropbox.html(html);
+        });
+        $form.find('[name="attachment"]').val(data.url);
+    },
+    always: function() {
+        $dropbox.removeClass('dragover');
+        $dropbox.find('.progress').hide().children('.progress-bar').css({width:0});
+    }
 });
 ```
