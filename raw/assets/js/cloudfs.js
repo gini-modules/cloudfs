@@ -35,8 +35,8 @@ define('cloudfs', ['jquery'], function($) {
             var info = false;
             if (evt.lengthComputable) {
                 info = {
-                    total: evt.total,
-                    percent: Math.round(evt.loaded * 100 / evt.total)
+                    total: evt.total
+                    ,percent: Math.round(evt.loaded * 100 / evt.total)
                 };
             }
             if (handler.progress) handler.progress(info, xhr);
@@ -44,10 +44,11 @@ define('cloudfs', ['jquery'], function($) {
 
         xhr.addEventListener('load', function(evt) {
             var status = evt.target.status;
-            if (status==200) {
+            if (status == 200) {
                 var data = JSON.parse(xhr.responseText);
                 $.post('ajax/cloudfs/uploaded', {
-                    server: that.server, data: data
+                    server: that.server
+                    ,data: data
                 }, function(data) {
                     if (handler.success) handler.success(data, xhr);
                     if (handler.always) handler.always(evt, xhr);
@@ -78,11 +79,11 @@ define('cloudfs', ['jquery'], function($) {
     CloudFS.prototype.upload = function(data, handler) {
         var that = this;
         $.get(that.configURL, {
-            server: that.server,
-            file: {
-                name: data.file.name,
-                size: data.file.size,
-                type: data.file.type
+            server: that.server
+            ,file: {
+                name: data.file.name
+                ,size: data.file.size
+                ,type: data.file.type
             }
         }, function(config) {
             var mHandlers = handler || {};
@@ -111,7 +112,7 @@ define('cloudfs', ['jquery'], function($) {
     };
 
     CloudFS.prototype.always = function(method) {
-        this.handlers.always= method;
+        this.handlers.always = method;
     };
 
     function _supportDragAndDrop() {
@@ -123,15 +124,43 @@ define('cloudfs', ['jquery'], function($) {
         upload: function(server, file, handlers) {
             var cfs = new CloudFS(server);
             return cfs.upload(file, handlers);
-        },
-        dropbox: function(opt) {
+        }
+        ,dropbox: function(opt) {
             if (!_supportDragAndDrop()) return;
 
             opt = opt || {};
             opt.server = opt.server || '';
 
+            function uploadFiles(files) {
+                if (!files.length) return;
+                var cfs = new CloudFS(opt.server);
+                opt.start && opt.start.call(that);
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    cfs.upload({
+                        file: file
+                    }, {
+                        progress: opt.progress
+                        ,abort: opt.abort
+                        ,error: opt.error
+                        ,success: opt.success
+                        ,always: opt.always
+                    });
+                }
+            }
+
             var that = opt.container;
             var $el = $(opt.container);
+
+            var $eleFile = $('<input type="file"/>');
+            $eleFile.hide();
+            $eleFile.on('change', function(evt) {
+                uploadFiles($(this).get(0).files);
+            });
+            $el.on('click', function(evt) {
+                $eleFile.click();
+            });
+            $el.before($eleFile);
 
             $el.on('dragover', function(evt) {
                 evt.preventDefault();
@@ -151,22 +180,10 @@ define('cloudfs', ['jquery'], function($) {
                 opt.leave && opt.leave.call(that);
 
                 var files = evt.originalEvent.dataTransfer.files;
-                if (!files.length) return;
-
-                var cfs = new CloudFS(opt.server);
-                opt.start && opt.start.call(that);
-                for (var i=0; i< files.length; i++) {
-                    var file = files[i];
-                    cfs.upload({ file: file }, {
-                        progress: opt.progress,
-                        abort: opt.abort,
-                        error: opt.error,
-                        success: opt.success,
-                        always: opt.always
-                    });
-                }
+                uploadFiles(files);
             });
         }
     };
 
 });
+
