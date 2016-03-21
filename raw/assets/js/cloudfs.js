@@ -157,10 +157,19 @@ define('cloudfs', ['jquery'], function($) {
             $eleFile.on('change', function(evt) {
                 uploadFiles($(this).get(0).files);
             });
-            $el.on('click', function(evt) {
-                $eleFile.click();
-            });
             $el.before($eleFile);
+
+            var clickHandler = opt.clickHandler;
+            if (!clickHandler) {
+                $el.on('click', function(evt) {
+                    $eleFile.click();
+                });
+            }
+            else {
+                $el.find(clickHandler).on('click', function(evt) {
+                    $eleFile.click();
+                });
+            }
 
             $el.on('dragover', function(evt) {
                 evt.preventDefault();
