@@ -203,7 +203,9 @@ class Qiniu implements \Gini\CloudFS\Driver
         $key = ltrim(parse_url($url, PHP_URL_PATH), '/');
         $bucketManager = new \Qiniu\Storage\BucketManager($auth);
 
-        return $bucketManager->delete($bucket, $key);
+        $ret = $bucketManager->delete($bucket, $key);
+
+        return $ret === null;
     }
 
     public function safeUrl($url)
@@ -217,5 +219,27 @@ class Qiniu implements \Gini\CloudFS\Driver
         $auth = new \Qiniu\Auth($accessKey, $secretKey);
 
         return $auth->privateDownloadUrl($url);
+    }
+
+    public function fetch($url, $file) {
+        if (!$url) {
+            return;
+        }
+
+        $options = $this->_config['options'];
+        $bucket = $options['bucket'];
+
+        $accessKey = $options['accessKey'];
+        $secretKey = $options['secretKey'];
+
+        $auth = new \Qiniu\Auth($accessKey, $secretKey);
+
+        $key = $this->_getFilename($file);
+        $bucketManager = new \Qiniu\Storage\BucketManager($auth);
+
+        list($ret, $err) = $bucketManager->fetch($url, $bucket, $key);
+        if ($err) return false;
+
+        return $this->_getUrl($ret['key']);
     }
 }

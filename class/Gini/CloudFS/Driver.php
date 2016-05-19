@@ -19,4 +19,5 @@ interface Driver
     public function config(array $data);
     public function delete($file);
     public function safeUrl($url);
+    public function fetch($url, $file);
 }

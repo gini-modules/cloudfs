@@ -62,6 +62,10 @@ namespace Gini\CloudFS
             return $this->driver->delete($url);
         }
 
+        public function fetch($url, $file) {
+            return $this->driver->fetch($url, $file);
+        }
+
         public static function of($name)
         {
             return \Gini\IoC::construct('\Gini\CloudFS\Server', $name);
