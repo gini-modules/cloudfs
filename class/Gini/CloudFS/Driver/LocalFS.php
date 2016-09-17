@@ -90,7 +90,7 @@ class LocalFS implements \Gini\CloudFS\Driver
     {
         $config = (array) $this->_config;
         $options = (array) $config['options'];
-        return URL($options['url'] ?: 'cloudfs/local', ['f'=>$url]);
+        return URL($options['url'] ?: 'cloudfs/local', ['s'=>$config['@name'], 'f'=>$url]);
     }
 
     public function delete($url)
