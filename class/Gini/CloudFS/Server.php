@@ -47,6 +47,11 @@ namespace Gini\CloudFS
             return $this->driver->config($data);
         }
 
+        public function upload(array $data)
+        {
+            return $this->driver->upload($data);
+        }
+
         public function callback(array $data)
         {
             return $this->driver->callback($data);

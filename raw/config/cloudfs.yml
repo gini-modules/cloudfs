@@ -1,0 +1,23 @@
+server:
+   default: local
+   # 各类cloud的配置信息，如qiniu, abc
+   # server1:
+   #     driver: Qiniu
+   #     options:
+   #         #不同的cloud可能或有不同的配置
+   #         # 比如：qiniu会有bucket，而ftp的方式可能就没有
+   #         bucket: BUCKETNAME
+   #         accessKey: CLOUDACCESSKEY
+   #         secretKey: CLOUDSECRETKEY
+   # local:
+   #     driver: LocalFS
+   #     options:
+   #         # 上传文件请求提交到的地址，默认为ajax/cloudfs/localfs/upload/[SERVER_NAME]
+   #         url: cloudfs/local
+   #         # cloudfs/local?s=[SERVER_NAME]&f=[FILE_NAME]
+   #         # 文件上传的路径，默认为data/cloudfs
+   #         root: data/cloudfs
+   #         # 支持上传的文件类型，默认为所有类型. 后缀名
+   #         types:
+   #            - xlsx
+   #            - txt
