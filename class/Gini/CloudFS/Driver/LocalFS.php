@@ -20,29 +20,6 @@ class LocalFS implements \Gini\CloudFS\Driver
         return $root.'/'.$filename;
     }
 
-    private function _uploadMe($file)
-    {
-        $error = $file['error'];
-        if ($error) {
-            return $error;
-        }
-
-        $tmp = $file['tmp_name'];
-        $size = $file['size'];
-
-        $filename = \Gini\Util::randPassword().microtime();
-        $filename = ($options['prefix'] ?: '').sha1(\Gini\Util::randPassword().microtime()).($ext ? '.'.$ext : '');
-
-        return [
-            'name' => $name,
-            'type' => $ext,
-            'size' => $size,
-            'filename' => $filename,
-            'file' => $this->_getFilePath($filename),
-            'tmp' => $tmp,
-        ];
-    }
-
     public function upload(array $file)
     {
         $config = $this->_config;
@@ -136,7 +113,20 @@ class LocalFS implements \Gini\CloudFS\Driver
     }
 
     public function fetch($url, $file) {
-        // localfs 暂时不支持抓取
-        return;
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
+        $filename = ($options['prefix'] ?: '')
+            . sha1(\Gini\Util::randPassword().microtime()).($ext ? '.'.$ext : '');
+        $filepath = $this->_getFilePath($filename);
+
+        $ch = curl_init(); 
+        $fh = fopen($filepath, 'wb'); 
+        curl_setopt($ch, CURLOPT_FILE, $fh); 
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_URL, $url); 
+        curl_exec($ch); 
+        fflush($fh); 
+        fclose($fh); 
+
+        return $this->_getUrl($filename);
     }
 }
