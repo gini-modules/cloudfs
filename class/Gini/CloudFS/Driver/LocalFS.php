@@ -114,6 +114,10 @@ class LocalFS implements \Gini\CloudFS\Driver
 
     public function fetch($url, $file) {
         $ext = pathinfo($file, PATHINFO_EXTENSION);
+
+        $config = (array) $this->_config;
+        $options = (array) $config['options'];
+
         $filename = ($options['prefix'] ?: '')
             . sha1(\Gini\Util::randPassword().microtime()).($ext ? '.'.$ext : '');
         $filepath = $this->_getFilePath($filename);
