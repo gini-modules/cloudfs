@@ -117,6 +117,7 @@ class LocalFS implements \Gini\CloudFS\Driver
         $filename = ($options['prefix'] ?: '')
             . sha1(\Gini\Util::randPassword().microtime()).($ext ? '.'.$ext : '');
         $filepath = $this->_getFilePath($filename);
+        \Gini\File::ensureDir(dirname($filepath));
 
         $ch = curl_init(); 
         $fh = fopen($filepath, 'wb'); 
