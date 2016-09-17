@@ -2,7 +2,7 @@
     "id": "cloudfs",
     "name": "CloudFS",
     "description": "CloudFS",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "dependencies": {
         "gini": ">=0.5.0"
     },
