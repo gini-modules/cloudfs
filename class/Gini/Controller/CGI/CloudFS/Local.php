@@ -16,11 +16,11 @@ class Local extends \Gini\Controller\CGI
         $root = $options['root'] ?: APP_PATH.'/'.DATA_DIR.'/cloudfs';
 
         $file = $root.'/'.$filename;
+        file_exists($file) or function () use ($file) {
+            throw new \BadFunctionCallException("File '$file' not found", 404);
+        };
 
-    	($finf = finfo_open(FILEINFO_MIME)) or function () use ($file) {
-    		throw new \BadFunctionCallException("File '$file' not found", 404);
-    	};
-
+        $finf = finfo_open(FILEINFO_MIME);
         $mime = finfo_file($finf, $file);
         finfo_close($finf);
         header('Pragma: public');
@@ -35,6 +35,5 @@ class Local extends \Gini\Controller\CGI
         header('Content-Length: ' . filesize($file));
         header('Connection: close');
         readfile($file);
-
     }
 }
