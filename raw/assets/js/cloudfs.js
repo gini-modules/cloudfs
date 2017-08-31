@@ -134,7 +134,10 @@ define('cloudfs', ['jquery'], function($) {
             function uploadFiles(files) {
                 if (!files.length) return;
                 var cfs = new CloudFS(opt.server);
-                opt.start && opt.start.call(that);
+                if (opt.start) {
+                    var canContinue = opt.start.call(that, evt);
+                    if (canContinue===false) return;
+                }
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     cfs.upload({
@@ -174,19 +177,19 @@ define('cloudfs', ['jquery'], function($) {
             $el.on('dragover', function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
-                opt.dragover && opt.dragover.call(that);
+                opt.dragover && opt.dragover.call(that, evt);
             }).on('dragenter', function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
-                opt.dragenter && opt.dragenter.call(that);
+                opt.dragenter && opt.dragenter.call(that, evt);
             }).on('dragleave', function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
-                opt.dragleave && opt.dragleave.call(that);
+                opt.dragleave && opt.dragleave.call(that, evt);
             }).on('drop', function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
-                opt.leave && opt.leave.call(that);
+                opt.leave && opt.leave.call(that, evt);
 
                 var files = evt.originalEvent.dataTransfer.files;
                 uploadFiles(files);
