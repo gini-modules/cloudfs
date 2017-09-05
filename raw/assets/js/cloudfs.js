@@ -134,6 +134,7 @@ define('cloudfs', ['jquery'], function($) {
             function uploadFiles(files) {
                 if (!files.length) return;
                 var cfs = new CloudFS(opt.server);
+                that.selectedFiles = files;
                 if (opt.start) {
                     var canContinue = opt.start.call(that);
                     if (canContinue===false) return;
