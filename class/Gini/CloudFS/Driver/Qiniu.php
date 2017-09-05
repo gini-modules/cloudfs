@@ -205,7 +205,7 @@ class Qiniu implements \Gini\CloudFS\Driver
 
         $ret = $bucketManager->delete($bucket, $key);
 
-        return $ret === null;
+        return ($ret === null || !@$ret->error);
     }
 
     public function safeUrl($url)
