@@ -128,22 +128,18 @@ class Qiniu implements \Gini\CloudFS\Driver
 
     public function upload(array $file)
     {
-        $result = false;
-
-        $file = $file['tmp_name'];
-        if (!$file) {
-            return $result;
+        $realFilename = $file['tmp_name'];
+        if (!file_exists($realFilename)) {
+            return false;
         }
 
-        $filename = $this->_getFilename($file);
+        $filename = $this->_getFilename($file['name']);
         $token = $this->_getToken($filename);
 
         $upManager = new \Qiniu\Storage\UploadManager();
-        list($ret, $err) = $upManager->putFile($token, $filename, $file);
+        list($ret, $err) = $upManager->putFile($token, $filename, $realFilename);
 
-        $result = $this->_filterResult($ret, $err);
-
-        return $result;
+        return $this->_filterResult($ret, $err);
     }
 
     public function config(array $file)
