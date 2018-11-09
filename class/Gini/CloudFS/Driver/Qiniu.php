@@ -26,7 +26,7 @@ class Qiniu implements \Gini\CloudFS\Driver
         $options = $this->_config['options'];
 
         if (isset($options['use_real_file_name']) && $options['use_real_file_name']) {
-            $name = call_user_func($options['func_get_file_name'], $file);
+            $name = $file;
         } else {
             $host = $_SERVER['HTTP_HOST'] ?: $_SERVER['SERVER_NAME'];
             $filename = \Gini\Util::randPassword().microtime();
