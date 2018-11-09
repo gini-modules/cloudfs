@@ -23,11 +23,17 @@ class Qiniu implements \Gini\CloudFS\Driver
 
     private function _getFilename($file)
     {
-        $host = $_SERVER['HTTP_HOST'] ?: $_SERVER['SERVER_NAME'];
         $options = $this->_config['options'];
-        $filename = \Gini\Util::randPassword().microtime();
 
-        return ($options['prefix'] ?: '').sha1($host.$filename).'.'.pathinfo($file, PATHINFO_EXTENSION);
+        if (isset($options['use_real_file_name']) && $options['use_real_file_name']) {
+            $name = call_user_func($options['func_get_file_name'], $file);
+        } else {
+            $host = $_SERVER['HTTP_HOST'] ?: $_SERVER['SERVER_NAME'];
+            $filename = \Gini\Util::randPassword().microtime();
+            $name = ($options['prefix'] ?: '').sha1($host.$filename).'.'.pathinfo($file, PATHINFO_EXTENSION);
+        }
+
+        return $name;
     }
 
     private function _getToken($filename, $cbkURL = null, $cbkBody = null)
@@ -41,10 +47,10 @@ class Qiniu implements \Gini\CloudFS\Driver
         $auth = new \Qiniu\Auth($accessKey, $secretKey);
 
         $opts = [];
-        if (isset($params['callback_body'])) {
+        if (isset($options['callback_body'])) {
             $opts['callbackBody'] = $cbkURL ?: $options['callback_url'];
         }
-        if (isset($params['callback_url'])) {
+        if (isset($options['callback_url'])) {
             $opts['callbackUrl'] = $cbkBody ?: $options['callback_body'];
         }
 
