@@ -7,7 +7,7 @@ class Local extends \Gini\Controller\CGI
     public function __index() {
         $form = $this->form();
         $filename = ltrim(trim($form['f']), '/');
-        if (strncmp($file, './', 2)==0 || strncmp($filename, '../', 3)==0) {
+        if (strncmp($filename, './', 2)==0 || strncmp($filename, '../', 3)==0) {
             return;
         }
 
@@ -26,10 +26,12 @@ class Local extends \Gini\Controller\CGI
         header('Pragma: public');
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($file)) . ' GMT');
         header('ETag: ' . md5(dirname($file)));
+        /*
         if ($expire) {
             header('Cache-Control: maxage=' . strtotime($expire));
             header('Expires: ' . gmdate('D, d M Y H:i:s', time() + strtotime($expire)) . ' GMT');
         }
+         */
         header('Content-Disposition: inline; filename=' . urlencode(basename($file)));
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($file));
