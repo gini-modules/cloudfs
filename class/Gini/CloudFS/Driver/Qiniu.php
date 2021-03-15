@@ -36,7 +36,7 @@ class Qiniu implements \Gini\CloudFS\Driver
         return $name;
     }
 
-    private function _getToken($filename, $cbkURL = null, $cbkBody = null)
+    private function _getToken($filename, $cbkURL = null, $cbkBody = null, $bindFileToken=false)
     {
         $options = $this->_config['options'];
         $bucket = $options['bucket'];
@@ -54,7 +54,7 @@ class Qiniu implements \Gini\CloudFS\Driver
             $opts['callbackUrl'] = $cbkBody ?: $options['callback_body'];
         }
 
-        return $auth->uploadToken($bucket, null, 3600, $opts);
+        return $auth->uploadToken($bucket, $bindFileToken ? $filename : null, 3600, $opts);
     }
 
     private function _filterResult($data, $error)
@@ -140,7 +140,7 @@ class Qiniu implements \Gini\CloudFS\Driver
         }
 
         $filename = $this->_getFilename($file['name']);
-        $token = $this->_getToken($filename);
+        $token = $this->_getToken($filename, null, null, $file['@qiniu_bind_key_token'] ? true : false);
 
         $upManager = new \Qiniu\Storage\UploadManager();
         list($ret, $err) = $upManager->putFile($token, $filename, $realFilename);
@@ -167,7 +167,7 @@ class Qiniu implements \Gini\CloudFS\Driver
         $data['url'] = 'http://up.qiniu.com';
 
         $filename = $this->_getFilename($file['name']);
-        $token = $this->_getToken($filename);
+        $token = $this->_getToken($filename, null, null, $file['@qiniu_bind_key_token'] ? true : false);
 
         $params['key'] = $filename;
         $params['token'] = $token;
